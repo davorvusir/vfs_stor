@@ -17,17 +17,21 @@ What is the connection between iRODS and Samba? None. Yet. Samba allows to exten
 
 As I am no C programmer, I reach out to you; a C programmer with some time on your hands.
 
+
 Project goal
+
 To develop a Samba VFS module that uses an iRODS zone as storage backend. The VFS module will present the iRODS zone as a SMB file share.
 
 Both Samba and iRODS are Kerberos and LDAP aware which make it possible to make both the Samba server and the iRODS server member of an Active Directory.
 
 Drawbacks/limitations
+
 iRODS doesn't use versioning (to my knowledge) which makes 'Previous versions' not accessible.
 
 As iCommands are going to be used by the Linux server when talking to the iRODS zone, it is a high probability that a file requested from a Windows client, has to be downloaded to the Linux/Samba server first. If that is true, the same is true for uploading files.
 
 Example of use case except the obvious file sharing
+
 Today it is almost mandatory to have a sync-n-share solution in place. ownCloud[10] is one of several suites that offers this functionality. Synchronization clients are available for Linux, MacOS and Windows, Android, iOS and Windows Phone[11].
 
 ownCloud has got several storage connectors. One is the SMB storage connector, which, of course, allows you to connect to standard Windows File Share. This VFS module, vfs_stor, Samba using an iRODS zone with ownCloud on top is an obvious choice. One idea on how to solve this 'ménage à trois' is presented at the 'CS3 Workshop on Cloud Services for File Synchronisation and Sharing'[12] workshop.
@@ -36,14 +40,25 @@ If you are a C programmer with some time on your hands, you are most welcome!
 
 
 [1] https://irods.org
+
 [2] https://irods.org/uploads/2016/06/technical-overview-2016-web.pdf
+
 [3] https://irods.org/news/
+
 [4] https://irods.org/2015/12/update-irods-client-interfaces/
+
 [5] https://github.com/ilarik/kanki-irodsclient
+
 [6] https://www.samba.org/
+
 [7] https://wiki.samba.org/index.php/Writing_a_Samba_VFS_Module
+
 [8] https://github.com/samba-team/samba/tree/master/examples/VFS
+
 [9] https://github.com/samba-team/samba/tree/master/source3/modules
+
 [10] https://www.owncloud.org, https://www.owncloud.com/
+
 [11] https://github.com/owncloud/windows-phone
+
 [12] https://indico.cern.ch/event/565381/contributions/2402652/
