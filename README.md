@@ -9,11 +9,11 @@ There is an open sourced middleware around, and has been for many years, that ma
 
 Have a look at the news section to see which prestigious organizations have joined the iRODS consortium[3].
 
-iRODS has got client software, the iCommands, which enables workstations to utilize the powerful middleware. The iCommands are command line utilities for Linux and MacOS. For those who prefer a GUI interface there is Kanki[4,5]. Something is missing, isn't there? What about Windows?
+iRODS has got client software, the iCommands, which enables workstations to utilize this powerful middleware. The iCommands are command line utilities for Linux and MacOS. For those who prefer a GUI interface there is Kanki[4,5]. Something is missing, isn't there? What about Windows?
 
 Samba[6] is another powerful open source project that is the software suite used to present file share resources on Linux to Windows clients. Of course it's possible for both Linux and MacOS clients to connect to a file share presented by Samba.
 
-What is the connection between iRODS and Samba? None. Yet. Samba allows to extend its file sharing functionality with Virtual File System (VFS) modules[7,8,9]. In [7] Samba Team outlines some examples of extending Samba and I would like to present to you the Samba VFS module, 'vfs_stor', to use with an iRODS zone.
+What is the connection between iRODS and Samba? None. Yet. Samba allows to extend its file sharing functionality with Virtual File System (VFS) modules[7,8,9]. Samba Team outlines some examples[7] of extending Samba and I would like to present to you the Samba VFS module, 'vfs_stor', to use with an iRODS zone.
 
 As I am no C programmer, I reach out to you; a C programmer with some time on your hands.
 
