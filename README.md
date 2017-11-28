@@ -3,9 +3,9 @@
 
 The word "stor" in vfs_stor is the swedish word "stör" and is pronounced [stø:r]. The english translation is "rod".
 
-With the all increasing unstructred data, there is an increasing need for storage and and ways to handle it. Whether you work in an SMB or one of the giants, there comes a time when it becomes cumbersome to handle; it grows complex, migration to new storage, backup-copies for resiliance, transfer of ownership when employees leave, sync-n-share, regulatory policies, archiving etc etc. You know all this.
+With the all increasing unstructred data, there is an increasing need for storage and and ways to handle it. Whether you work for an SMB or one of the giants or a governmental body, there comes a time when it becomes cumbersome; it grows complex, migration to new storage is needed, backup-copies for resiliance, transfer of ownership when employees leave, sync-n-share, regulatory policies, archiving etc etc. You know all this.
 
-There is an open sourced middleware around, and has been for many years, that makes it possible for you to implement your data management policies. It doesn't matter whether you are responisble for million of files or files that are millions of kilobyte. With a plugin-based architecture you can extend its functionality to fit your needs. With iRODS[1] you can federate and, of course, still apply apply security templates that complies with your organizations policies. The technical overview[2] will get you more up-to-date with iRODS possibilities.
+There is an open sourced middleware around, and has been for many years, that makes it possible for you to implement your data management policies. It doesn't matter whether you are responsible for million of files or files that are millions of kilobyte. With its plugin-based architecture you can extend the functionality to fit your needs. With iRODS[1] you can federate and, of course, still apply security templates that complies with your organizations policies. The technical overview[2] will get you more up-to-date with iRODS possibilities.
 
 Have a look at the news section to see which prestigious organizations have joined the iRODS consortium[3].
 
@@ -13,7 +13,7 @@ iRODS has got client software, the iCommands, which enables workstations to util
 
 Samba[6] is another powerful open source project that is the software suite used to present file share resources on Linux to Windows clients. Of course it's possible for both Linux and MacOS clients to connect to a file share presented by Samba.
 
-What is the connection between iRODS and Samba? None. Yet. Samba allows to extend its file sharing functionality with Virtual File System (VFS) modules[7,8,9]. In [7] Samba Team outlines some examples of extending Samba and I would like to present to you the Samba VFS module, 'vfs_stor', to use with an iRODS zone. On my Github page I present the VFS module, the project goal, possible drawbacks and a use case besides the obvious file sharing.
+What is the connection between iRODS and Samba? None. Yet. Samba allows to extend its file sharing functionality with Virtual File System (VFS) modules[7,8,9]. In [7] Samba Team outlines some examples of extending Samba and I would like to present to you the Samba VFS module, 'vfs_stor', to use with an iRODS zone.
 
 As I am no C programmer, I reach out to you; a C programmer with some time on your hands.
 
