@@ -47,4 +47,4 @@ If you are a C programmer with some time on your hands, you are most welcome!
 [9] https://github.com/samba-team/samba/tree/master/source3/modules \
 [10] https://www.owncloud.org, https://www.owncloud.com/ \
 [11] https://github.com/owncloud/windows-phone \
-[12] https://indico.cern.ch/event/565381/contributions/2402652/ \
+[12] https://indico.cern.ch/event/565381/contributions/2402652/
