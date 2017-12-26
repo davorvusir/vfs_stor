@@ -1,0 +1,191 @@
+The goal with this installation and configuration guide is to have a working
+test environment where Kerberos is used for authentication.
+
+You need three servers for your test environment: one Windows server acting
+as a domain controller, one Linux server acting as a file server using Samba
+and one Linux server that will be the iRODS server.
+
+As domain controller I have chosen Windows Server 2008 R2 and Ubuntu 16.04 LTS
+for Linux servers.
+
+Samba is of version 4.7.3 and compiled from sources.
+
+The three servers are named:
+Domain controller:	dc1.datadelikatesser.se, 192.168.1.6
+Linux, Samba:		samba.datadelikatesser.se, 192.168.1.8
+Linux, iRODS:		rods.datadelikatesser.se, 192.168.1.9
+
+The installation and configuration is devided into three separate tasks, where
+the first is to promote the Windows server to a domain controlller. There are
+numerous guides on the internet, but there is no need to go any further then
+to source: https://technet.microsoft.com/en-us/library/cc755103(v=ws.10).aspx
+
+This guide also assumes that you have set uidNumber and gidNumber on the
+user accounts and gidNumber on the groups in Active Directory.
+
+On the Linux server that will act as a file server, samba.datadelikatesser.se, start
+with adding "/usr/local/samba/sbin:/usr/local/samba/bin" to /etc/environment, /etc/login.defs
+and 'secure_path' using visudo.
+
+Download Samba source files: wget https://download.samba.org/pub/samba/stable/samba-4.7.3.tar.gz.
+I usually put it in /usr/src/samba/samba-M.m.x. Extract the archive and compile:
+
+./configure --without-ad-dc --enable-debug --enable-selftest --jobs=2
+make
+make install
+
+Continue with editing /usr/local/samba/etc/smb.conf. You find an example file
+within this project.
+
+Now you are almost set to make the file server a member server of your
+Windows domain. First we need a /etc/krb5.conf that matches your
+domain configuration. Download and edit the example file in this project.
+
+Run 'kinit administrator'. And check the keytab with 'klist -e':
+admin@samba:~$ klist -e
+Ticket cache: FILE:/tmp/krb5cc_1000
+Default principal: administrator@DATADELIKATESSER.SE
+
+Valid starting       Expires              Service principal
+12/23/2017 15:58:05  12/24/2017 01:58:05  krbtgt/DATADELIKATESSER.SE@DATADELIKATESSER.SE
+        renew until 12/30/2017 15:57:34, Etype (skey, tkt): arcfour-hmac, aes256-cts-hmac-sha1-96
+admind@isamba:~$
+
+Join the server to the Windows domain: 'net ads join -k'
+
+Edit /etc/nsswitch.conf and add winbind next to 'compat' on ´the passwd and group lines.
+An example file is provided.
+
+Create links for nss (https://wiki.samba.org/index.php/Libnss_winbind_Links):
+# ln -s /usr/local/samba/lib/libnss_winbind.so.2 /lib/x86_64-linux-gnu/
+# ln -s /lib/x86_64-linux-gnu/libnss_winbind.so.2 /lib/x86_64-linux-gnu/libnss_winbind.so
+# ldconfig
+
+Start winbind and type 'id davor', 'getent passwd davor' and 'getent group 'domain users'.
+The output should be similar to:
+admin@samba:~$ id davor
+uid=11104(davor) gid=10513(domain users) groups=10513(domain users),3000001(BUILTIN\users)
+admin@samba:~$ getent passwd davor
+davor:*:11104:10513:Davor Vusir:/data/home/davor:/bin/bash
+admind@isamba:~$ getent group 'domain users'
+domain users:x:10513:
+
+Next to do is to configure PAM:
+Copy the contants to /etc/pam.d/samba
+Edit /etc/pam.d/common-accout, /etc/pam.d/common-auth and /etc/pam.d/common-session-noninteractive
+
+Start a new shell and connect to the server with ssh using your Active Directory account:
+ssh davor@samba.datadelikatesser.se.
+Issue an 'klist -e':
+davor@isamba:~$ klist -e
+Ticket cache: FILE:/tmp/krb5cc_11104
+Default principal: davor@DATADELIKATESSER.SE
+
+Valid starting       Expires              Service principal
+12/23/2017 16:36:49  12/24/2017 02:36:47  krbtgt/DATADELIKATESSER.SE@DATADELIKATESSER.SE
+        renew until 12/30/2017 16:36:49, Etype (skey, tkt): arcfour-hmac, aes256-cts-hmac-sha1-96
+12/23/2017 16:36:49  12/24/2017 02:36:47  SAMBA$@DATADELIKATESSER.SE
+        Etype (skey, tkt): arcfour-hmac, arcfour-hmac
+
+All above steps are in the excellent guides that Samba Team provides through https://wiki.samba.org/.
+
+---
+
+First start with adding iRODS repository. Instructions are found here: https://packages.irods.org/
+
+To install iRODS there is easy-to-follow guide here:
+https://irods.org/uploads/2016/06/irods_beginner_training_2016.pdf
+
+Add your user account as a RODS user and make it possible to logon using Kerberos
+by issuing the command 'iadmin aua davor davor@DATADELIKATESSER.SE'
+
+With the Windows domain in place you have to create a service account for iRODS to use.
+I used the account name (service principal) "irods" and create a keytab for iRODS server application to use:
+
+C:\Users\Administrator>ktpass /princ irodsserver/rods.datadelikatesser.se@DATADELIKATESSER.SE /pass P@ssW0rd /crypto RC4-HMAC-NT /mapuser DATADELIKATESS\irods /out irods.keytab
+Targeting domain controller: DC1.datadelikatesser.se
+Using legacy password setting method
+Successfully mapped irodsserver/rods.datadelikatesser.se to irods.
+WARNING: pType and account type do not match. This might cause problems.
+Key created.
+Output keytab to irods.keytab:
+Keytab version: 0x502
+keysize 79 irodsserver/rods.datadelikatesser.se@DATADELIKATESSER.SE ptype 0 (KRB5_NT_UNKNOWN) vno 3 etype 0x17 (RC4-HMAC) keylength 16 (0x0ae967c026ba385f0fd173a53fec533c)
+
+C:\Users\Administrator>
+
+Note the change of userPrincipalName and servicePrincipal of the newly created service account.
+
+Transfer the keytab to the iRODS server.
+Install the Kerberos authentication plugin: apt-get install irods-auth-plugin-krb
+
+Edit /etc/irods/server_config.json. Add the following:
+    "environment_variables": {
+        ...,
+        "KRB5_KTNAME": "/etc/krb5.keytab"
+
+and at the bottom
+
+    "KerberosServicePrincipal": "irodsserver/rods.datadelikatesser.se@DATADELIKATESSER.SE",
+    "KerberosKeytab": "/etc/krb5.keytab",
+
+root@rods:~# klist -ke
+Keytab name: FILE:/etc/krb5.keytab
+KVNO Principal
+---- --------------------------------------------------------------------------
+   3 irodsserver/rods.datadelikatesser.se@DATADELIKATESSER.SE (arcfour-hmac)
+root@rods:~#
+
+Restart iRODS: /etc/init.d/irods restart
+
+Note the version number from both the creation of the keytab on the domain controller and from reading the keytab on the iRODS server.
+
+---
+
+Back to the server samba.datadelikatesser.se and install the iCommands the Kerberos authentication plugin:
+apt-get install irods-icommands irods-auth-plugin-krb
+ 
+Edit /data/home/davor/.irods/irods_environment.json. Use the provided example file as a template.
+
+davor@samba:~$ iinit 0
+davor@samba:~$ ils -A
+/tempZone/home/davor:
+        ACL - davor#tempZone:own
+        Inheritance - Disabled
+  test1.txt
+        ACL - iRODS-GG-davor#tempZone:modify object   davor#tempZone:own
+  C- /tempZone/home/davor/test
+davor@samba:~$
+davor@samba:~$ klist -e
+Ticket cache: FILE:/tmp/krb5cc_11104
+Default principal: davor@DATADELIKATESSER.SE
+
+Valid starting       Expires              Service principal
+12/26/2017 06:33:43  12/26/2017 16:33:42  krbtgt/DATADELIKATESSER.SE@DATADELIKATESSER.SE
+        renew until 01/02/2018 06:33:43, Etype (skey, tkt): arcfour-hmac, aes256-cts-hmac-sha1-96
+12/26/2017 06:33:43  12/26/2017 16:33:42  SAMBA$@DATADELIKATESSER.SE
+        Etype (skey, tkt): arcfour-hmac, arcfour-hmac
+12/26/2017 06:46:21  12/26/2017 16:33:42  irodsserver/rods.datadelikatesser.se@DATADELIKATESSER.SE
+        renew until 01/02/2018 06:33:43, Etype (skey, tkt): arcfour-hmac, arcfour-hmac
+
+davor@samba:~$ sudo klist -ke
+[sudo] password for davor:
+Keytab name: FILE:/etc/krb5.keytab
+KVNO Principal
+---- --------------------------------------------------------------------------
+   3 host/samba.datadelikatesser.se@DATADELIKATESSER.SE (des-cbc-crc)
+   3 host/SAMBA@DATADELIKATESSER.SE (des-cbc-crc)
+   3 host/samba.datadelikatesser.se@DATADELIKATESSER.SE (des-cbc-md5)
+   3 host/SAMBA@DATADELIKATESSER.SE (des-cbc-md5)
+   3 host/samba.datadelikatesser.se@DATADELIKATESSER.SE (aes128-cts-hmac-sha1-96)
+   3 host/SAMBA@DATADELIKATESSER.SE (aes128-cts-hmac-sha1-96)
+   3 host/samba.datadelikatesser.se@DATADELIKATESSER.SE (aes256-cts-hmac-sha1-96)
+   3 host/SAMBA@DATADELIKATESSER.SE (aes256-cts-hmac-sha1-96)
+   3 host/samba.datadelikatesser.se@DATADELIKATESSER.SE (arcfour-hmac)
+   3 host/SAMBA@DATADELIKATESSER.SE (arcfour-hmac)
+   3 SAMBA$@DATADELIKATESSER.SE (des-cbc-crc)
+   3 SAMBA$@DATADELIKATESSER.SE (des-cbc-md5)
+   3 SAMBA$@DATADELIKATESSER.SE (aes128-cts-hmac-sha1-96)
+   3 SAMBA$@DATADELIKATESSER.SE (aes256-cts-hmac-sha1-96)
+   3 SAMBA$@DATADELIKATESSER.SE (arcfour-hmac)
+davor@samba:~$
