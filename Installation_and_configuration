@@ -30,7 +30,7 @@ and 'secure_path' using visudo.
 Download Samba source files: wget https://download.samba.org/pub/samba/stable/samba-4.7.3.tar.gz.
 I usually put it in /usr/src/samba/samba-M.m.x. Extract the archive and compile:
 
-./configure --without-ad-dc --enable-debug --enable-selftest --jobs=2
+./configure --without-ad-dc --enable-debug --enable-developer --enable-selftest --with-profiling-data --gdbtest --valgrind-log=/usr/src/samba/valgrind/samba-4.7.3/valgrind.log --jobs=2
 make
 make install
 
