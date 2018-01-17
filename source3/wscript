@@ -1612,6 +1612,23 @@ main() {
                                       and conf.CHECK_LIB('dbus-1', shlib=True)):
             conf.DEFINE('HAVE_DBUS', '1')
 
+    #
+    # vfs_stor
+    #
+    conf.CHECK_HEADERS('irods/rcConnect.h')
+    conf.CHECK_HEADERS('irods/rods.h')
+    conf.CHECK_HEADERS('irods/parseCommandLine.h')
+    conf.CHECK_HEADERS('irods/rcMisc.h')
+    conf.CHECK_HEADERS('irods/rodsClient.h')
+    conf.CHECK_HEADERS('irods/rcConnect.h')
+    conf.CHECK_HEADERS('irods/sockComm.h')
+    conf.CHECK_HEADERS('irods/stringOpr.h')
+    conf.CHECK_LIB('irods_client', shlib=True)
+    conf.CHECK_LIB('irods_common', shlib=True)
+    conf.CHECK_LIB('irods_plugin_dependencies', shlib=True)
+    conf.CHECK_LIB('irods_server', shlib=True)
+    conf.ADD_LDFLAGS('-lirods_client -lirods_common -lirods_plugin_dependencies -lirods_server')
+
     conf.env.build_regedit = False
     if not Options.options.with_regedit == False:
         conf.PROCESS_SEPARATE_RULE('system_ncurses')
