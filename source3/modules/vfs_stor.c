@@ -50,7 +50,7 @@
 #undef DBGC_CLASS
 #define DBGC_CLASS DBGC_VFS
 
-static struct stor {
+struct stor {
 	rcComm_t *irods_conn;
 	rErrMsg_t *errMsg;
 //	rodsArguments_t myRodsArgument;
