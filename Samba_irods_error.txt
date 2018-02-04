@@ -1,468 +1,50 @@
-load_module_absolute_path: Module '/usr/local/samba/lib/vfs/stor.so' loaded
-[VFS_STOR] - home_dir: /data/home/davor
-[VFS_STOR] - home_directory: /data/home/davor
-[VFS_STOR] - HOME env var: /data/home/davor
-[VFS_STOR] - getRodsEnv myEnv.rodsHost: rods.test.vusir.se
-[VFS_STOR] - getRodsEnv, status: 0
-
-Breakpoint 1, stor_connect (handle=0x5555558154e0, service=0x5555557ed950 "test",
-    user=0x5555557fcf20 "TEST\\davor") at ../source3/modules/vfs_stor.c:134
-134                     rods_data->irods_conn = rcConnect(rods_data->myEnv.rodsHost,
-(gdb) p rods_data->myEnv
-$1 = {rodsUserName = "davor", '\000' <repeats 58 times>,
-  rodsHost = "rods.test.vusir.se", '\000' <repeats 45 times>, rodsPort = 1247,
-  xmsgHost = '\000' <repeats 63 times>, xmsgPort = 0,
-  rodsHome = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsCwd = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsAuthScheme = "KRB\000ve", '\000' <repeats 57 times>, rodsDefResource = '\000' <repeats 63 times>,
-  rodsZone = "tempZone", '\000' <repeats 55 times>, rodsLogLevel = 0,
-  rodsAuthFile = '\000' <repeats 255 times>, rodsDebug = '\000' <repeats 63 times>,
-  rodsClientServerPolicy = '\000' <repeats 255 times>,
-  rodsClientServerNegotiation = '\000' <repeats 255 times>, rodsEncryptionKeySize = 0,
-  rodsEncryptionSaltSize = 0, rodsEncryptionNumHashRounds = 0,
-  rodsEncryptionAlgorithm = '\000' <repeats 127 times>, rodsDefaultHashScheme = '\000' <repeats 63 times>,
-  rodsMatchHashPolicy = '\000' <repeats 63 times>, irodsSSLCACertificatePath = '\000' <repeats 1087 times>,
-  irodsSSLCACertificateFile = '\000' <repeats 1087 times>, irodsSSLVerifyServer = '\000' <repeats 1087 times>,
-  irodsSSLCertificateChainFile = '\000' <repeats 1087 times>,
-  irodsSSLCertificateKeyFile = '\000' <repeats 1087 times>,
-  irodsSSLDHParamsFile = '\000' <repeats 1087 times>, irodsCtrlPlaneKey = '\000' <repeats 1087 times>,
-  irodsCtrlPlanePort = 0, irodsCtrlPlaneEncryptionNumHashRounds = 0,
-  irodsCtrlPlaneEncryptionAlgorithm = '\000' <repeats 127 times>, irodsMaxSizeForSingleBuffer = 32,
-  irodsDefaultNumberTransferThreads = 4, irodsTransBufferSizeForParaTrans = 4,
-  irodsPluginHome = '\000' <repeats 1087 times>}
-(gdb) p rods_data
-$2 = (struct stor *) 0x555555815580
-(gdb) p rods_data->irods_conn
-$3 = (rcComm_t *) 0x0
-(gdb) c
-Continuing.
-
-Program received signal SIGSEGV, Segmentation fault.
-0x00007fffe0047403 in boost::unordered::detail::table_impl<boost::unordered::detail::map<std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const, boost::any> >, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, boost::any, irods::irods_string_hash, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > > >::operator[](std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) () from /usr/lib/libirods_client.so.4.2.2
-(gdb)
-
----
-
-[2018/01/23 18:38:41.973629,  1] ../source3/modules/vfs_stor.c:133(stor_connect)
-  [VFS_STOR] - getRodsEnv, status: 0
-[2018/01/23 18:38:41.997155,  0] ../lib/util/fault.c:78(fault_report)
-  ===============================================================
-[2018/01/23 18:38:41.997236,  0] ../lib/util/fault.c:79(fault_report)
-  INTERNAL ERROR: Signal 11 in pid 1786 (4.7.3)
-  Please read the Trouble-Shooting section of the Samba HOWTO
-[2018/01/23 18:38:41.997283,  0] ../lib/util/fault.c:81(fault_report)
-  ===============================================================
-[2018/01/23 18:38:41.997314,  0] ../source3/lib/util.c:804(smb_panic_s3)
-  PANIC (pid 1786): internal error
-[2018/01/23 18:38:41.998186,  0] ../source3/lib/util.c:915(log_stack_trace)
-  BACKTRACE: 44 stack frames:
-   #0 /usr/local/samba/lib/libsmbconf.so.0(log_stack_trace+0x1f) [0x7f32452d3236]
-   #1 /usr/local/samba/lib/libsmbconf.so.0(smb_panic_s3+0x6d) [0x7f32452d3087]
-   #2 /usr/local/samba/lib/libsamba-util.so.0(smb_panic+0x28) [0x7f32477983a2]
-   #3 /usr/local/samba/lib/libsamba-util.so.0(+0x2d080) [0x7f3247798080]
-   #4 /usr/local/samba/lib/libsamba-util.so.0(+0x2d095) [0x7f3247798095]
-   #5 /lib/x86_64-linux-gnu/libpthread.so.0(+0x11390) [0x7f3247c01390]
-   #6 /usr/lib/libirods_client.so.4.2.2(_ZN5boost9unordered6detail10table_implINS1_3mapINSt3__19allocatorINS4_4pairIKNS4_12basic_stringIcNS4_11char_traitsIcEENS5_IcEEEENS_3anyEEEEESB_SD_N5irods17irods_string_hashENS4_8equal_toISB_EEEEEixERSC_+0x13) [0x7f32300e9403]
-   #7 /usr/lib/libirods_client.so.4.2.2(_ZZN5irods11plugin_base4callIJPKcP8BytesBufS5_S5_i11irodsProt_tEEENS_5errorEP8rsComm_tRKNSt3__112basic_stringIcNSA_11char_traitsIcEENSA_9allocatorIcEEEEN5boost10shared_ptrINS_18first_class_objectEEEDpT_ENKUlRNS_14plugin_contextEPSG_S3_S5_S5_S5_iS6_E_clESQ_SR_S3_S5_S5_S5_iS6_+0x5a) [0x7f323012a30a]
-   #8 /usr/lib/libirods_client.so.4.2.2(_ZN5irods11plugin_base4callIJPKcP8BytesBufS5_S5_i11irodsProt_tEEENS_5errorEP8rsComm_tRKNSt3__112basic_stringIcNSA_11char_traitsIcEENSA_9allocatorIcEEEEN5boost10shared_ptrINS_18first_class_objectEEEDpT_+0x1af) [0x7f3230128b7f]
-   #9 /usr/lib/libirods_client.so.4.2.2(_Z11sendRodsMsgN5boost10shared_ptrIN5irods14network_objectEEEPKcP8BytesBufS7_S7_i11irodsProt_t+0x153) [0x7f3230124cf3]
-   #10 /usr/lib/libirods_client.so.4.2.2(sendStartupPack+0x233) [0x7f3230124283]
-   #11 /usr/lib/libirods_client.so.4.2.2(connectToRhost+0x55) [0x7f3230123175]
-   #12 /usr/lib/libirods_client.so.4.2.2(_rcConnect+0x24d) [0x7f323010f65d]
-   #13 /usr/lib/libirods_client.so.4.2.2(rcConnect+0x6b) [0x7f323010f3fb]
-   #14 /usr/local/samba/lib/vfs/stor.so(+0x1f22) [0x7f323037cf22]
-   #15 /usr/local/samba/lib/private/libsmbd-base-samba4.so(smb_vfs_call_connect+0x4d) [0x7f324733f8bc]
-   #16 /usr/local/samba/lib/private/libsmbd-base-samba4.so(+0x21c788) [0x7f3247360788]
-   #17 /usr/local/samba/lib/private/libsmbd-base-samba4.so(make_connection_smb2+0xe1) [0x7f324736183d]
-   #18 /usr/local/samba/lib/private/libsmbd-base-samba4.so(+0x2416d9) [0x7f32473856d9]
-   #19 /usr/local/samba/lib/private/libsmbd-base-samba4.so(+0x241afb) [0x7f3247385afb]
-   #20 /usr/local/samba/lib/private/libsmbd-base-samba4.so(smbd_smb2_request_process_tcon+0x2b1) [0x7f3247384c5a]
-   #21 /usr/local/samba/lib/private/libsmbd-base-samba4.so(smbd_smb2_request_dispatch+0x15c0) [0x7f3247378b0b]
-   #22 /usr/local/samba/lib/private/libsmbd-base-samba4.so(+0x239ed0) [0x7f324737ded0]
-   #23 /usr/local/samba/lib/private/libsmbd-base-samba4.so(+0x239fd6) [0x7f324737dfd6]
-   #24 /usr/local/samba/lib/private/libtevent.so.0(+0xe4ac) [0x7f32467284ac]
-   #25 /usr/local/samba/lib/private/libtevent.so.0(+0xeae4) [0x7f3246728ae4]
-   #26 /usr/local/samba/lib/private/libtevent.so.0(+0xb7e0) [0x7f32467257e0]
-   #27 /usr/local/samba/lib/private/libtevent.so.0(_tevent_loop_once+0x10f) [0x7f324671f0f1]
-   #28 /usr/local/samba/lib/private/libtevent.so.0(tevent_common_loop_wait+0x25) [0x7f324671f408]
-   #29 /usr/local/samba/lib/private/libtevent.so.0(+0xb882) [0x7f3246725882]
-   #30 /usr/local/samba/lib/private/libtevent.so.0(_tevent_loop_wait+0x2b) [0x7f324671f4ab]
-   #31 /usr/local/samba/lib/private/libsmbd-base-samba4.so(smbd_process+0xc32) [0x7f324735e6fa]
-   #32 /usr/local/samba/sbin/smbd(+0xcbf2) [0x558081a89bf2]
-   #33 /usr/local/samba/lib/private/libtevent.so.0(+0xe4ac) [0x7f32467284ac]
-   #34 /usr/local/samba/lib/private/libtevent.so.0(+0xeae4) [0x7f3246728ae4]
-   #35 /usr/local/samba/lib/private/libtevent.so.0(+0xb7e0) [0x7f32467257e0]
-   #36 /usr/local/samba/lib/private/libtevent.so.0(_tevent_loop_once+0x10f) [0x7f324671f0f1]
-   #37 /usr/local/samba/lib/private/libtevent.so.0(tevent_common_loop_wait+0x25) [0x7f324671f408]
-   #38 /usr/local/samba/lib/private/libtevent.so.0(+0xb882) [0x7f3246725882]
-   #39 /usr/local/samba/lib/private/libtevent.so.0(_tevent_loop_wait+0x2b) [0x7f324671f4ab]
-   #40 /usr/local/samba/sbin/smbd(+0xd98c) [0x558081a8a98c]
-   #41 /usr/local/samba/sbin/smbd(main+0x18b7) [0x558081a8cb32]
-   #42 /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf0) [0x7f3243951830]
-   #43 /usr/local/samba/sbin/smbd(_start+0x29) [0x558081a82fd9]
-[2018/01/23 18:38:41.998833,  0] ../source3/lib/util.c:816(smb_panic_s3)
-  smb_panic(): calling panic action [/bin/sleep 999999999]
-
-  ---
-  From rodsServerLog:
-  Jan 24 05:40:20 pid:1164 remote addresses: 192.168.1.8 ERROR: readWorkerTask - readStartupPack failed. -115000
-
-  ---
-  
-  [VFS_STOR] - getRodsEnv, status: 0
-
-Breakpoint 1, stor_connect (handle=0x5555558156a0, service=0x5555557ef5d0 "test",
-    user=0x5555557faad0 "TEST\\davor") at ../source3/modules/vfs_stor.c:100
-100                     rods_data->irods_conn = rcConnect(
-(gdb) p rods_data->stor_env
-$1 = {rodsUserName = "davor", '\000' <repeats 58 times>,
-  rodsHost = "rods.test.vusir.se", '\000' <repeats 45 times>, rodsPort = 1247,
-  xmsgHost = '\000' <repeats 63 times>, xmsgPort = 0,
-  rodsHome = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsCwd = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsAuthScheme = "KRB\000ve", '\000' <repeats 57 times>
-  
-  (gdb) c
-Continuing.
-remote addresses: 192.168.1.8 ERROR: _rcConnect: setRhostInfo error, IRODS_HOST is probably not set correctly status = -302000 USER_RODS_HOST_EMPTY
-[VFS_STOR] - error iRODS connection: rods_data->irods_conn == NULL
-
----
-20180201:
-(gdb) p vfs_stor_data->stor_env
-$1 = {rodsUserName = "davor", '\000' <repeats 58 times>,
-  rodsHost = "rods.test.vusir.se", '\000' <repeats 45 times>, rodsPort = 1247,
-  xmsgHost = '\000' <repeats 63 times>, xmsgPort = 0,
-  rodsHome = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsCwd = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsAuthScheme = "KRB\000ve", '\000' <repeats 57 times>, rodsDefResource = '\000' <repeats 63 times>,
-  rodsZone = "tempZone", '\000' <repeats 55 times>, rodsLogLevel = 0, rodsAuthFile = '\000' <repeats 255 times>,
-  rodsDebug = '\000' <repeats 63 times>, rodsClientServerPolicy = '\000' <repeats 255 times>,
-  rodsClientServerNegotiation = '\000' <repeats 255 times>, rodsEncryptionKeySize = 0,
-  rodsEncryptionSaltSize = 0, rodsEncryptionNumHashRounds = 0,
-  rodsEncryptionAlgorithm = '\000' <repeats 127 times>, rodsDefaultHashScheme = '\000' <repeats 63 times>,
-  rodsMatchHashPolicy = '\000' <repeats 63 times>, irodsSSLCACertificatePath = '\000' <repeats 1087 times>,
-  irodsSSLCACertificateFile = '\000' <repeats 1087 times>, irodsSSLVerifyServer = '\000' <repeats 1087 times>,
-  irodsSSLCertificateChainFile = '\000' <repeats 1087 times>,
-  irodsSSLCertificateKeyFile = '\000' <repeats 1087 times>, irodsSSLDHParamsFile = '\000' <repeats 1087 times>,
-  irodsCtrlPlaneKey = '\000' <repeats 1087 times>, irodsCtrlPlanePort = 0,
-  irodsCtrlPlaneEncryptionNumHashRounds = 0, irodsCtrlPlaneEncryptionAlgorithm = '\000' <repeats 127 times>,
-  irodsMaxSizeForSingleBuffer = 32, irodsDefaultNumberTransferThreads = 4, irodsTransBufferSizeForParaTrans = 4,
-  irodsPluginHome = '\000' <repeats 1087 times>}
-(gdb) s
-101                             vfs_stor_data->stor_env.rodsHost,
-(gdb) s
-100                     vfs_stor_data->irods_conn = rcConnect(
-(gdb) s
-
-Program received signal SIGSEGV, Segmentation fault.
-0x00007fffe0047403 in boost::unordered::detail::table_impl<boost::unordered::detail::map<std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const, boost::any> >, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, boost::any, irods::irods_string_hash, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > > >::operator[](std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) () from /usr/lib/libirods_client.so.4.2.2
-(gdb)
-Single stepping until exit from function _ZN5boost9unordered6detail10table_implINS1_3mapINSt3__19allocatorINS4_4pairIKNS4_12basic_stringIcNS4_11char_traitsIcEENS5_IcEEEENS_3anyEEEEESB_SD_N5irods17irods_string_hashENS4_8equal_toISB_EEEEEixERSC_,
-which has no line number information.
-sig_fault (sig=0) at ../lib/util/fault.c:93
-93      {
-(gdb)
-94              fault_report(sig);
-(gdb)
-
-(gdb) p vfs_stor_data->irods_conn
-$2 = (rcComm_t *) 0x0
-(gdb) p vfs_stor_data->err_msg
-$3 = (rErrMsg_t *) 0x0
-(gdb) s
-104                             vfs_stor_data->stor_env.rodsZone,
-(gdb) s
-103                             vfs_stor_data->stor_env.rodsUserName,
-(gdb) s
-100                     vfs_stor_data->irods_conn = rcConnect(
-(gdb) s
-101                             vfs_stor_data->stor_env.rodsHost,
-(gdb) s
-100                     vfs_stor_data->irods_conn = rcConnect(
-(gdb) s
-remote addresses: 192.168.1.8 ERROR: _rcConnect: setRhostInfo error, IRODS_HOST is probably not set correctly status = -302000 USER_RODS_HOST_EMPTY
-107             if (vfs_stor_data->irods_conn == NULL) {
-(gdb) s
-108                     DEBUG(1, ("[VFS_STOR] - error iRODS connection: %s\n",
-(gdb) s
-[VFS_STOR] - error iRODS connection: vfs_stor_data->irods_conn == NULL
-
-110             return -1;
-(gdb) p vfs_stor_data->irods_conn
-$4 = (rcComm_t *) 0x0
-(gdb)
-
----
-
-(gdb) s
-100                             vfs_stor_data->stor_env.rodsHost,
-(gdb) p vfs_stor_data->stor_env
-$2 = {rodsUserName = "davor", '\000' <repeats 58 times>,
-  rodsHost = "rods.test.vusir.se", '\000' <repeats 45 times>, rodsPort = 1247,
-  xmsgHost = '\000' <repeats 63 times>, xmsgPort = 0,
-  rodsHome = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsCwd = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsAuthScheme = "KRB\000ve", '\000' <repeats 57 times>, rodsDefResource = '\000' <repeats 63 times>,
-  rodsZone = "tempZone", '\000' <repeats 55 times>, rodsLogLevel = 0, rodsAuthFile = '\000' <repeats 255 times>,
-  rodsDebug = '\000' <repeats 63 times>, rodsClientServerPolicy = '\000' <repeats 255 times>,
-  rodsClientServerNegotiation = '\000' <repeats 255 times>, rodsEncryptionKeySize = 0,
-  rodsEncryptionSaltSize = 0, rodsEncryptionNumHashRounds = 0,
-  rodsEncryptionAlgorithm = '\000' <repeats 127 times>, rodsDefaultHashScheme = '\000' <repeats 63 times>,
-  rodsMatchHashPolicy = '\000' <repeats 63 times>, irodsSSLCACertificatePath = '\000' <repeats 1087 times>,
-  irodsSSLCACertificateFile = '\000' <repeats 1087 times>, irodsSSLVerifyServer = '\000' <repeats 1087 times>,
-  irodsSSLCertificateChainFile = '\000' <repeats 1087 times>,
-  irodsSSLCertificateKeyFile = '\000' <repeats 1087 times>, irodsSSLDHParamsFile = '\000' <repeats 1087 times>,
-  irodsCtrlPlaneKey = '\000' <repeats 1087 times>, irodsCtrlPlanePort = 0,
-  irodsCtrlPlaneEncryptionNumHashRounds = 0, irodsCtrlPlaneEncryptionAlgorithm = '\000' <repeats 127 times>,
-  irodsMaxSizeForSingleBuffer = 32, irodsDefaultNumberTransferThreads = 4, irodsTransBufferSizeForParaTrans = 4,
-  irodsPluginHome = '\000' <repeats 1087 times>}
-(gdb) s
+20180204, rErrMsg_t err_msg:
+Breakpoint 1, stor_connect (handle=0x555555815560, service=0x5555557edb80 "test",
+    user=0x5555557f0600 "TEST\\davor") at ../source3/modules/vfs_stor.c:99
 99                      vfs_stor_data->irods_conn = rcConnect(
-(gdb) s
-remote addresses: 192.168.1.8 ERROR: _rcConnect: setRhostInfo error, IRODS_HOST is probably not set correctly status = -302000 USER_RODS_HOST_EMPTY
-106             if (vfs_stor_data->irods_conn == NULL) {
-(gdb) p vfs_stor_data->stor_env
-$3 = {rodsUserName = "onnect: setRhostInfo failed\n", '\000' <repeats 35 times>,
-  rodsHost = '\000' <repeats 63 times>, rodsPort = 0, xmsgHost = '\000' <repeats 63 times>, xmsgPort = 0,
-  rodsHome = '\000' <repeats 1087 times>, rodsCwd = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsAuthScheme = "KRB\000ve", '\000' <repeats 57 times>, rodsDefResource = '\000' <repeats 63 times>,
-  rodsZone = "tempZone", '\000' <repeats 55 times>, rodsLogLevel = 0, rodsAuthFile = '\000' <repeats 255 times>,
-  rodsDebug = '\000' <repeats 63 times>, rodsClientServerPolicy = '\000' <repeats 255 times>,
-  rodsClientServerNegotiation = '\000' <repeats 255 times>, rodsEncryptionKeySize = 0,
-  rodsEncryptionSaltSize = 0, rodsEncryptionNumHashRounds = 0,
-  rodsEncryptionAlgorithm = '\000' <repeats 127 times>, rodsDefaultHashScheme = '\000' <repeats 63 times>,
-  rodsMatchHashPolicy = '\000' <repeats 63 times>, irodsSSLCACertificatePath = '\000' <repeats 1087 times>,
-  irodsSSLCACertificateFile = '\000' <repeats 1087 times>, irodsSSLVerifyServer = '\000' <repeats 1087 times>,
-  irodsSSLCertificateChainFile = '\000' <repeats 1087 times>,
-  irodsSSLCertificateKeyFile = '\000' <repeats 1087 times>, irodsSSLDHParamsFile = '\000' <repeats 1087 times>,
-  irodsCtrlPlaneKey = '\000' <repeats 1087 times>, irodsCtrlPlanePort = 0,
-  irodsCtrlPlaneEncryptionNumHashRounds = 0, irodsCtrlPlaneEncryptionAlgorithm = '\000' <repeats 127 times>,
-  irodsMaxSizeForSingleBuffer = 32, irodsDefaultNumberTransferThreads = 4, irodsTransBufferSizeForParaTrans = 4,
-  irodsPluginHome = '\000' <repeats 1087 times>}
-(gdb)
-
----
-
-20180204:
-Breakpoint 1, stor_connect (handle=0x5555558156a0, service=0x5555557ef5d0 "test",
-    user=0x5555557faad0 "TEST\\davor") at ../source3/modules/vfs_stor.c:99
-99                      vfs_stor_data->irods_conn = rcConnect(
-(gdb) p vfs_stor_data->stor_env
-$1 = {rodsUserName = "davor", '\000' <repeats 58 times>,
-  rodsHost = "rods.test.vusir.se", '\000' <repeats 45 times>, rodsPort = 1247,
-  xmsgHost = '\000' <repeats 63 times>, xmsgPort = 0,
-  rodsHome = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsCwd = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsAuthScheme = "KRB\000ve", '\000' <repeats 57 times>, rodsDefResource = '\000' <repeats 63 times>,
-  rodsZone = "tempZone", '\000' <repeats 55 times>, rodsLogLevel = 0, rodsAuthFile = '\000' <repeats 255 times>,
-  rodsDebug = '\000' <repeats 63 times>, rodsClientServerPolicy = '\000' <repeats 255 times>,
-  rodsClientServerNegotiation = '\000' <repeats 255 times>, rodsEncryptionKeySize = 0,
-  rodsEncryptionSaltSize = 0, rodsEncryptionNumHashRounds = 0,
-  rodsEncryptionAlgorithm = '\000' <repeats 127 times>, rodsDefaultHashScheme = '\000' <repeats 63 times>,
-  rodsMatchHashPolicy = '\000' <repeats 63 times>, irodsSSLCACertificatePath = '\000' <repeats 1087 times>,
-  irodsSSLCACertificateFile = '\000' <repeats 1087 times>, irodsSSLVerifyServer = '\000' <repeats 1087 times>,
-  irodsSSLCertificateChainFile = '\000' <repeats 1087 times>,
-  irodsSSLCertificateKeyFile = '\000' <repeats 1087 times>, irodsSSLDHParamsFile = '\000' <repeats 1087 times>,
-  irodsCtrlPlaneKey = '\000' <repeats 1087 times>, irodsCtrlPlanePort = 0,
-  irodsCtrlPlaneEncryptionNumHashRounds = 0, irodsCtrlPlaneEncryptionAlgorithm = '\000' <repeats 127 times>,
-  irodsMaxSizeForSingleBuffer = 32, irodsDefaultNumberTransferThreads = 4, irodsTransBufferSizeForParaTrans = 4,
-  irodsPluginHome = '\000' <repeats 1087 times>}
-(gdb) p vfs_stor_data->irods_conn
-$2 = (rcComm_t *) 0x0
-(gdb) s
-104                             0, &vfs_stor_data->err_msg);
-(gdb) p vfs_stor_data->err_msg
-$3 = (rErrMsg_t *) 0x0
-(gdb) p vfs_stor_data->stor_env
-$4 = {rodsUserName = "davor", '\000' <repeats 58 times>,
-  rodsHost = "rods.test.vusir.se", '\000' <repeats 45 times>, rodsPort = 1247,
-  xmsgHost = '\000' <repeats 63 times>, xmsgPort = 0,
-  rodsHome = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsCwd = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsAuthScheme = "KRB\000ve", '\000' <repeats 57 times>, rodsDefResource = '\000' <repeats 63 times>,
-  rodsZone = "tempZone", '\000' <repeats 55 times>, rodsLogLevel = 0, rodsAuthFile = '\000' <repeats 255 times>,
-  rodsDebug = '\000' <repeats 63 times>, rodsClientServerPolicy = '\000' <repeats 255 times>,
-  rodsClientServerNegotiation = '\000' <repeats 255 times>, rodsEncryptionKeySize = 0,
-  rodsEncryptionSaltSize = 0, rodsEncryptionNumHashRounds = 0,
-  rodsEncryptionAlgorithm = '\000' <repeats 127 times>, rodsDefaultHashScheme = '\000' <repeats 63 times>,
-  rodsMatchHashPolicy = '\000' <repeats 63 times>, irodsSSLCACertificatePath = '\000' <repeats 1087 times>,
-  irodsSSLCACertificateFile = '\000' <repeats 1087 times>, irodsSSLVerifyServer = '\000' <repeats 1087 times>,
-  irodsSSLCertificateChainFile = '\000' <repeats 1087 times>,
-  irodsSSLCertificateKeyFile = '\000' <repeats 1087 times>, irodsSSLDHParamsFile = '\000' <repeats 1087 times>,
-  irodsCtrlPlaneKey = '\000' <repeats 1087 times>, irodsCtrlPlanePort = 0,
-  irodsCtrlPlaneEncryptionNumHashRounds = 0, irodsCtrlPlaneEncryptionAlgorithm = '\000' <repeats 127 times>,
-  irodsMaxSizeForSingleBuffer = 32, irodsDefaultNumberTransferThreads = 4, irodsTransBufferSizeForParaTrans = 4,
-  irodsPluginHome = '\000' <repeats 1087 times>}
+(gdb) p err_msg
+$1 = {status = 0, msg = '\000' <repeats 1023 times>}
 (gdb) s
 103                             vfs_stor_data->stor_env.rodsZone,
-(gdb) p vfs_stor_data->stor_env
-$5 = {rodsUserName = "davor", '\000' <repeats 58 times>,
-  rodsHost = "rods.test.vusir.se", '\000' <repeats 45 times>, rodsPort = 1247,
-  xmsgHost = '\000' <repeats 63 times>, xmsgPort = 0,
-  rodsHome = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsCwd = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsAuthScheme = "KRB\000ve", '\000' <repeats 57 times>, rodsDefResource = '\000' <repeats 63 times>,
-  rodsZone = "tempZone", '\000' <repeats 55 times>, rodsLogLevel = 0, rodsAuthFile = '\000' <repeats 255 times>,
-  rodsDebug = '\000' <repeats 63 times>, rodsClientServerPolicy = '\000' <repeats 255 times>,
-  rodsClientServerNegotiation = '\000' <repeats 255 times>, rodsEncryptionKeySize = 0,
-  rodsEncryptionSaltSize = 0, rodsEncryptionNumHashRounds = 0,
-  rodsEncryptionAlgorithm = '\000' <repeats 127 times>, rodsDefaultHashScheme = '\000' <repeats 63 times>,
-  rodsMatchHashPolicy = '\000' <repeats 63 times>, irodsSSLCACertificatePath = '\000' <repeats 1087 times>,
-  irodsSSLCACertificateFile = '\000' <repeats 1087 times>, irodsSSLVerifyServer = '\000' <repeats 1087 times>,
-  irodsSSLCertificateChainFile = '\000' <repeats 1087 times>,
-  irodsSSLCertificateKeyFile = '\000' <repeats 1087 times>, irodsSSLDHParamsFile = '\000' <repeats 1087 times>,
-  irodsCtrlPlaneKey = '\000' <repeats 1087 times>, irodsCtrlPlanePort = 0,
-  irodsCtrlPlaneEncryptionNumHashRounds = 0, irodsCtrlPlaneEncryptionAlgorithm = '\000' <repeats 127 times>,
-  irodsMaxSizeForSingleBuffer = 32, irodsDefaultNumberTransferThreads = 4, irodsTransBufferSizeForParaTrans = 4,
-  irodsPluginHome = '\000' <repeats 1087 times>}
-(gdb) p vfs_stor_data->err_msg
-$6 = (rErrMsg_t *) 0x0
 (gdb) s
 102                             vfs_stor_data->stor_env.rodsUserName,
-(gdb) p vfs_stor_data->stor_env
-$7 = {rodsUserName = "davor", '\000' <repeats 58 times>,
-  rodsHost = "rods.test.vusir.se", '\000' <repeats 45 times>, rodsPort = 1247,
-  xmsgHost = '\000' <repeats 63 times>, xmsgPort = 0,
-  rodsHome = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsCwd = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsAuthScheme = "KRB\000ve", '\000' <repeats 57 times>, rodsDefResource = '\000' <repeats 63 times>,
-  rodsZone = "tempZone", '\000' <repeats 55 times>, rodsLogLevel = 0, rodsAuthFile = '\000' <repeats 255 times>,
-  rodsDebug = '\000' <repeats 63 times>, rodsClientServerPolicy = '\000' <repeats 255 times>,
-  rodsClientServerNegotiation = '\000' <repeats 255 times>, rodsEncryptionKeySize = 0,
-  rodsEncryptionSaltSize = 0, rodsEncryptionNumHashRounds = 0,
-  rodsEncryptionAlgorithm = '\000' <repeats 127 times>, rodsDefaultHashScheme = '\000' <repeats 63 times>,
-  rodsMatchHashPolicy = '\000' <repeats 63 times>, irodsSSLCACertificatePath = '\000' <repeats 1087 times>,
-  irodsSSLCACertificateFile = '\000' <repeats 1087 times>, irodsSSLVerifyServer = '\000' <repeats 1087 times>,
-  irodsSSLCertificateChainFile = '\000' <repeats 1087 times>,
-  irodsSSLCertificateKeyFile = '\000' <repeats 1087 times>, irodsSSLDHParamsFile = '\000' <repeats 1087 times>,
-  irodsCtrlPlaneKey = '\000' <repeats 1087 times>, irodsCtrlPlanePort = 0,
-  irodsCtrlPlaneEncryptionNumHashRounds = 0, irodsCtrlPlaneEncryptionAlgorithm = '\000' <repeats 127 times>,
-  irodsMaxSizeForSingleBuffer = 32, irodsDefaultNumberTransferThreads = 4, irodsTransBufferSizeForParaTrans = 4,
-  irodsPluginHome = '\000' <repeats 1087 times>}
-(gdb) p vfs_stor_data->err_msg
-$8 = (rErrMsg_t *) 0x0
 (gdb) s
 101                             vfs_stor_data->stor_env.rodsPort,
-(gdb) p vfs_stor_data->stor_env
-$9 = {rodsUserName = "davor", '\000' <repeats 58 times>,
-  rodsHost = "rods.test.vusir.se", '\000' <repeats 45 times>, rodsPort = 1247,
-  xmsgHost = '\000' <repeats 63 times>, xmsgPort = 0,
-  rodsHome = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsCwd = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsAuthScheme = "KRB\000ve", '\000' <repeats 57 times>, rodsDefResource = '\000' <repeats 63 times>,
-  rodsZone = "tempZone", '\000' <repeats 55 times>, rodsLogLevel = 0, rodsAuthFile = '\000' <repeats 255 times>,
-  rodsDebug = '\000' <repeats 63 times>, rodsClientServerPolicy = '\000' <repeats 255 times>,
-  rodsClientServerNegotiation = '\000' <repeats 255 times>, rodsEncryptionKeySize = 0,
-  rodsEncryptionSaltSize = 0, rodsEncryptionNumHashRounds = 0,
-  rodsEncryptionAlgorithm = '\000' <repeats 127 times>, rodsDefaultHashScheme = '\000' <repeats 63 times>,
-  rodsMatchHashPolicy = '\000' <repeats 63 times>, irodsSSLCACertificatePath = '\000' <repeats 1087 times>,
-  irodsSSLCACertificateFile = '\000' <repeats 1087 times>, irodsSSLVerifyServer = '\000' <repeats 1087 times>,
-  irodsSSLCertificateChainFile = '\000' <repeats 1087 times>,
-  irodsSSLCertificateKeyFile = '\000' <repeats 1087 times>, irodsSSLDHParamsFile = '\000' <repeats 1087 times>,
-  irodsCtrlPlaneKey = '\000' <repeats 1087 times>, irodsCtrlPlanePort = 0,
-  irodsCtrlPlaneEncryptionNumHashRounds = 0, irodsCtrlPlaneEncryptionAlgorithm = '\000' <repeats 127 times>,
-  irodsMaxSizeForSingleBuffer = 32, irodsDefaultNumberTransferThreads = 4, irodsTransBufferSizeForParaTrans = 4,
-  irodsPluginHome = '\000' <repeats 1087 times>}
-(gdb) p vfs_stor_data->err_msg
-$10 = (rErrMsg_t *) 0x0
 (gdb) s
 99                      vfs_stor_data->irods_conn = rcConnect(
-(gdb) p vfs_stor_data->stor_env
-$11 = {rodsUserName = "davor", '\000' <repeats 58 times>,
-  rodsHost = "rods.test.vusir.se", '\000' <repeats 45 times>, rodsPort = 1247,
-  xmsgHost = '\000' <repeats 63 times>, xmsgPort = 0,
-  rodsHome = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsCwd = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsAuthScheme = "KRB\000ve", '\000' <repeats 57 times>, rodsDefResource = '\000' <repeats 63 times>,
-  rodsZone = "tempZone", '\000' <repeats 55 times>, rodsLogLevel = 0, rodsAuthFile = '\000' <repeats 255 times>,
-  rodsDebug = '\000' <repeats 63 times>, rodsClientServerPolicy = '\000' <repeats 255 times>,
-  rodsClientServerNegotiation = '\000' <repeats 255 times>, rodsEncryptionKeySize = 0,
-  rodsEncryptionSaltSize = 0, rodsEncryptionNumHashRounds = 0,
-  rodsEncryptionAlgorithm = '\000' <repeats 127 times>, rodsDefaultHashScheme = '\000' <repeats 63 times>,
-  rodsMatchHashPolicy = '\000' <repeats 63 times>, irodsSSLCACertificatePath = '\000' <repeats 1087 times>,
-  irodsSSLCACertificateFile = '\000' <repeats 1087 times>, irodsSSLVerifyServer = '\000' <repeats 1087 times>,
-  irodsSSLCertificateChainFile = '\000' <repeats 1087 times>,
-  irodsSSLCertificateKeyFile = '\000' <repeats 1087 times>, irodsSSLDHParamsFile = '\000' <repeats 1087 times>,
-  irodsCtrlPlaneKey = '\000' <repeats 1087 times>, irodsCtrlPlanePort = 0,
-  irodsCtrlPlaneEncryptionNumHashRounds = 0, irodsCtrlPlaneEncryptionAlgorithm = '\000' <repeats 127 times>,
-  irodsMaxSizeForSingleBuffer = 32, irodsDefaultNumberTransferThreads = 4, irodsTransBufferSizeForParaTrans = 4,
-  irodsPluginHome = '\000' <repeats 1087 times>}
-(gdb) p vfs_stor_data->err_msg
-$12 = (rErrMsg_t *) 0x0
-(gdb) p vfs_stor_data->irods_conn
-$13 = (rcComm_t *) 0x0
 (gdb) s
 100                             vfs_stor_data->stor_env.rodsHost,
-(gdb) p vfs_stor_data->stor_env
-$14 = {rodsUserName = "davor", '\000' <repeats 58 times>,
-  rodsHost = "rods.test.vusir.se", '\000' <repeats 45 times>, rodsPort = 1247,
-  xmsgHost = '\000' <repeats 63 times>, xmsgPort = 0,
-  rodsHome = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsCwd = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsAuthScheme = "KRB\000ve", '\000' <repeats 57 times>, rodsDefResource = '\000' <repeats 63 times>,
-  rodsZone = "tempZone", '\000' <repeats 55 times>, rodsLogLevel = 0, rodsAuthFile = '\000' <repeats 255 times>,
-  rodsDebug = '\000' <repeats 63 times>, rodsClientServerPolicy = '\000' <repeats 255 times>,
-  rodsClientServerNegotiation = '\000' <repeats 255 times>, rodsEncryptionKeySize = 0,
-  rodsEncryptionSaltSize = 0, rodsEncryptionNumHashRounds = 0,
-  rodsEncryptionAlgorithm = '\000' <repeats 127 times>, rodsDefaultHashScheme = '\000' <repeats 63 times>,
-  rodsMatchHashPolicy = '\000' <repeats 63 times>, irodsSSLCACertificatePath = '\000' <repeats 1087 times>,
-  irodsSSLCACertificateFile = '\000' <repeats 1087 times>, irodsSSLVerifyServer = '\000' <repeats 1087 times>,
-  irodsSSLCertificateChainFile = '\000' <repeats 1087 times>,
-  irodsSSLCertificateKeyFile = '\000' <repeats 1087 times>, irodsSSLDHParamsFile = '\000' <repeats 1087 times>,
-  irodsCtrlPlaneKey = '\000' <repeats 1087 times>, irodsCtrlPlanePort = 0,
-  irodsCtrlPlaneEncryptionNumHashRounds = 0, irodsCtrlPlaneEncryptionAlgorithm = '\000' <repeats 127 times>,
-  irodsMaxSizeForSingleBuffer = 32, irodsDefaultNumberTransferThreads = 4, irodsTransBufferSizeForParaTrans = 4,
-  irodsPluginHome = '\000' <repeats 1087 times>}
-(gdb) p vfs_stor_data->err_msg
-$15 = (rErrMsg_t *) 0x0
 (gdb) s
 99                      vfs_stor_data->irods_conn = rcConnect(
-(gdb) p vfs_stor_data->stor_env
-$16 = {rodsUserName = "davor", '\000' <repeats 58 times>,
-  rodsHost = "rods.test.vusir.se", '\000' <repeats 45 times>, rodsPort = 1247,
-  xmsgHost = '\000' <repeats 63 times>, xmsgPort = 0,
-  rodsHome = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsCwd = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsAuthScheme = "KRB\000ve", '\000' <repeats 57 times>, rodsDefResource = '\000' <repeats 63 times>,
-  rodsZone = "tempZone", '\000' <repeats 55 times>, rodsLogLevel = 0, rodsAuthFile = '\000' <repeats 255 times>,
-  rodsDebug = '\000' <repeats 63 times>, rodsClientServerPolicy = '\000' <repeats 255 times>,
-  rodsClientServerNegotiation = '\000' <repeats 255 times>, rodsEncryptionKeySize = 0,
-  rodsEncryptionSaltSize = 0, rodsEncryptionNumHashRounds = 0,
-  rodsEncryptionAlgorithm = '\000' <repeats 127 times>, rodsDefaultHashScheme = '\000' <repeats 63 times>,
-  rodsMatchHashPolicy = '\000' <repeats 63 times>, irodsSSLCACertificatePath = '\000' <repeats 1087 times>,
-  irodsSSLCACertificateFile = '\000' <repeats 1087 times>, irodsSSLVerifyServer = '\000' <repeats 1087 times>,
-  irodsSSLCertificateChainFile = '\000' <repeats 1087 times>,
-  irodsSSLCertificateKeyFile = '\000' <repeats 1087 times>, irodsSSLDHParamsFile = '\000' <repeats 1087 times>,
-  irodsCtrlPlaneKey = '\000' <repeats 1087 times>, irodsCtrlPlanePort = 0,
-  irodsCtrlPlaneEncryptionNumHashRounds = 0, irodsCtrlPlaneEncryptionAlgorithm = '\000' <repeats 127 times>,
-  irodsMaxSizeForSingleBuffer = 32, irodsDefaultNumberTransferThreads = 4, irodsTransBufferSizeForParaTrans = 4,
-  irodsPluginHome = '\000' <repeats 1087 times>}
-(gdb) p vfs_stor_data->err_msg
-$17 = (rErrMsg_t *) 0x0
 (gdb) s
-remote addresses: 192.168.1.8 ERROR: _rcConnect: setRhostInfo error, IRODS_HOST is probably not set correctly status = -302000 USER_RODS_HOST_EMPTY
-106             if (vfs_stor_data->irods_conn == NULL) {
-(gdb) p vfs_stor_data->stor_env
-$18 = {rodsUserName = "onnect: setRhostInfo failed\n", '\000' <repeats 35 times>,
-  rodsHost = '\000' <repeats 63 times>, rodsPort = 0, xmsgHost = '\000' <repeats 63 times>, xmsgPort = 0,
-  rodsHome = '\000' <repeats 1087 times>, rodsCwd = "/tempZone/home/davor", '\000' <repeats 1067 times>,
-  rodsAuthScheme = "KRB\000ve", '\000' <repeats 57 times>, rodsDefResource = '\000' <repeats 63 times>,
-  rodsZone = "tempZone", '\000' <repeats 55 times>, rodsLogLevel = 0, rodsAuthFile = '\000' <repeats 255 times>,
-  rodsDebug = '\000' <repeats 63 times>, rodsClientServerPolicy = '\000' <repeats 255 times>,
-  rodsClientServerNegotiation = '\000' <repeats 255 times>, rodsEncryptionKeySize = 0,
-  rodsEncryptionSaltSize = 0, rodsEncryptionNumHashRounds = 0,
-  rodsEncryptionAlgorithm = '\000' <repeats 127 times>, rodsDefaultHashScheme = '\000' <repeats 63 times>,
-  rodsMatchHashPolicy = '\000' <repeats 63 times>, irodsSSLCACertificatePath = '\000' <repeats 1087 times>,
-  irodsSSLCACertificateFile = '\000' <repeats 1087 times>, irodsSSLVerifyServer = '\000' <repeats 1087 times>,
-  irodsSSLCertificateChainFile = '\000' <repeats 1087 times>,
-  irodsSSLCertificateKeyFile = '\000' <repeats 1087 times>, irodsSSLDHParamsFile = '\000' <repeats 1087 times>,
-  irodsCtrlPlaneKey = '\000' <repeats 1087 times>, irodsCtrlPlanePort = 0,
-  irodsCtrlPlaneEncryptionNumHashRounds = 0, irodsCtrlPlaneEncryptionAlgorithm = '\000' <repeats 127 times>,
-  irodsMaxSizeForSingleBuffer = 32, irodsDefaultNumberTransferThreads = 4, irodsTransBufferSizeForParaTrans = 4,
-  irodsPluginHome = '\000' <repeats 1087 times>}
-(gdb) p vfs_stor_data->err_msg
-$19 = (rErrMsg_t *) 0x4363725ffffb6450
-(gdb) p vfs_stor_data->irods_conn
-$20 = (rcComm_t *) 0x0
-(gdb)
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007fffe0047403 in boost::unordered::detail::table_impl<boost::unordered::detail::map<std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const, boost::any> >, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, boost::any, irods::irods_string_hash, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > > >::operator[](std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) () from /usr/lib/libirods_client.so.4.2.2
+(gdb) p err_msg
+No symbol "err_msg" in current context.
+(gdb) c
+Continuing.
+===============================================================
+INTERNAL ERROR: Signal 11 in pid 7376 (4.7.3)
+Please read the Trouble-Shooting section of the Samba HOWTO
+===============================================================
+PANIC (pid 7376): internal error
+BACKTRACE: 44 stack frames:
+ #0 /usr/local/samba/lib/libsmbconf.so.0(log_stack_trace+0x1f) [0x7ffff529d236]
+ #1 /usr/local/samba/lib/libsmbconf.so.0(smb_panic_s3+0x6d) [0x7ffff529d087]
+ #2 /usr/local/samba/lib/libsamba-util.so.0(smb_panic+0x28) [0x7ffff77623a2]
+ #3 /usr/local/samba/lib/libsamba-util.so.0(+0x2d080) [0x7ffff7762080]
+ #4 /usr/local/samba/lib/libsamba-util.so.0(+0x2d095) [0x7ffff7762095]
+ #5 /lib/x86_64-linux-gnu/libpthread.so.0(+0x11390) [0x7ffff7bcb390]
+ #6 /usr/lib/libirods_client.so.4.2.2(_ZN5boost9unordered6detail10table_implINS1_3mapINSt3__19allocatorINS4_4pairIKNS4_12basic_stringIcNS4_11char_traitsIcEENS5_IcEEEENS_3anyEEEEESB_SD_N5irods17irods_string_hashENS4_8equal_toISB_EEEEEixERSC_+0x13) [0x7fffe0047403]
+ #7 /usr/lib/libirods_client.so.4.2.2(_ZZN5irods11plugin_base4callIJPKcP8BytesBufS5_S5_i11irodsProt_tEEENS_5errorEP8rsComm_tRKNSt3__112basic_stringIcNSA_11char_traitsIcEENSA_9allocatorIcEEEEN5boost10shared_ptrINS_18first_class_objectEEEDpT_ENKUlRNS_14plugin_contextEPSG_S3_S5_S5_S5_iS6_E_clESQ_SR_S3_S5_S5_S5_iS6_+0x5a) [0x7fffe008830a]
+ #8 /usr/lib/libirods_client.so.4.2.2(_ZN5irods11plugin_base4callIJPKcP8BytesBufS5_S5_i11irodsProt_tEEENS_5errorEP8rsComm_tRKNSt3__112basic_stringIcNSA_11char_traitsIcEENSA_9allocatorIcEEEEN5boost10shared_ptrINS_18first_class_objectEEEDpT_+0x1af) [0x7fffe0086b7f]
+ #9 /usr/lib/libirods_client.so.4.2.2(_Z11sendRodsMsgN5boost10shared_ptrIN5irods14network_objectEEEPKcP8BytesBufS7_S7_i11irodsProt_t+0x153) [0x7fffe0082cf3]
+ #10 /usr/lib/libirods_client.so.4.2.2(sendStartupPack+0x233) [0x7fffe0082283]
+ #11 /usr/lib/libirods_client.so.4.2.2(connectToRhost+0x55) [0x7fffe0081175]
+ #12 /usr/lib/libirods_client.so.4.2.2(_rcConnect+0x24d) [0x7fffe006d65d]
+ #13 /usr/lib/libirods_client.so.4.2.2(rcConnect+0x6b) [0x7fffe006d3fb]
+ #14 /usr/local/samba/lib/vfs/stor.so(+0x1df6) [0x7fffe02dadf6]
+
+---
+20180404, rErrMsg_t *err_msg:
