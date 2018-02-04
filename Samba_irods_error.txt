@@ -47,4 +47,76 @@ BACKTRACE: 44 stack frames:
  #14 /usr/local/samba/lib/vfs/stor.so(+0x1df6) [0x7fffe02dadf6]
 
 ---
-20180404, rErrMsg_t *err_msg:
+20180404, 
+struct stor_data {
+    rErrMsg_t err_msg;
+} *vfs_stor_data;
+
+Breakpoint 1, stor_connect (handle=0x5555558155c0, service=0x5555557ee3b0 "test",
+    user=0x5555557f3100 "TEST\\davor") at ../source3/modules/vfs_stor.c:99
+99                      vfs_stor_data->irods_conn = rcConnect(
+(gdb) p vfs_stor_data->err_msg
+$1 = {status = 0, msg = '\000' <repeats 1023 times>}
+(gdb) s
+104                             0, &vfs_stor_data->err_msg);
+(gdb) s
+99                      vfs_stor_data->irods_conn = rcConnect(
+(gdb) s
+103                             vfs_stor_data->stor_env.rodsZone,
+(gdb) s
+102                             vfs_stor_data->stor_env.rodsUserName,
+(gdb) s
+101                             vfs_stor_data->stor_env.rodsPort,
+(gdb) s
+99                      vfs_stor_data->irods_conn = rcConnect(
+(gdb) s
+100                             vfs_stor_data->stor_env.rodsHost,
+(gdb) p vfs_stor_data->err_msg
+$2 = {status = 0, msg = '\000' <repeats 1023 times>}
+(gdb) s
+99                      vfs_stor_data->irods_conn = rcConnect(
+(gdb) p vfs_stor_data->err_msg
+$3 = {status = 0, msg = '\000' <repeats 1023 times>}
+(gdb) s
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007fffe0047403 in boost::unordered::detail::table_impl<boost::unordered::detail::map<std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const, boost::any> >, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, boost::any, irods::irods_string_hash, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > > >::operator[](std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) () from /usr/lib/libirods_client.so.4.2.2
+(gdb) p vfs_stor_data->err_msg
+$4 = {status = 0, msg = '\000' <repeats 1023 times>}
+(gdb) s
+Single stepping until exit from function _ZN5boost9unordered6detail10table_implINS1_3mapINSt3__19allocatorINS4_4pairIKNS4_12basic_stringIcNS4_11char_traitsIcEENS5_IcEEEENS_3anyEEEEESB_SD_N5irods17irods_string_hashENS4_8equal_toISB_EEEEEixERSC_,
+which has no line number information.
+sig_fault (sig=0) at ../lib/util/fault.c:93
+93      {
+(gdb) p vfs_stor_data->err_msg
+$5 = {status = 0, msg = '\000' <repeats 1023 times>}
+(gdb) c
+Continuing.
+===============================================================
+INTERNAL ERROR: Signal 11 in pid 11212 (4.7.3)
+Please read the Trouble-Shooting section of the Samba HOWTO
+===============================================================
+PANIC (pid 11212): internal error
+BACKTRACE: 44 stack frames:
+ #0 /usr/local/samba/lib/libsmbconf.so.0(log_stack_trace+0x1f) [0x7ffff529d236]
+ #1 /usr/local/samba/lib/libsmbconf.so.0(smb_panic_s3+0x6d) [0x7ffff529d087]
+ #2 /usr/local/samba/lib/libsamba-util.so.0(smb_panic+0x28) [0x7ffff77623a2]
+ #3 /usr/local/samba/lib/libsamba-util.so.0(+0x2d080) [0x7ffff7762080]
+ #4 /usr/local/samba/lib/libsamba-util.so.0(+0x2d095) [0x7ffff7762095]
+ #5 /lib/x86_64-linux-gnu/libpthread.so.0(+0x11390) [0x7ffff7bcb390]
+ #6 /usr/lib/libirods_client.so.4.2.2(_ZN5boost9unordered6detail10table_implINS1_3mapINSt3__19allocatorINS4_4pairIKNS4_12basic_stringIcNS4_11char_traitsIcEENS5_IcEEEENS_3anyEEEEESB_SD_N5irods17irods_string_hashENS4_8equal_toISB_EEEEEixERSC_+0x13) [0x7fffe0047403]
+ #7 /usr/lib/libirods_client.so.4.2.2(_ZZN5irods11plugin_base4callIJPKcP8BytesBufS5_S5_i11irodsProt_tEEENS_5errorEP8rsComm_tRKNSt3__112basic_stringIcNSA_11char_traitsIcEENSA_9allocatorIcEEEEN5boost10shared_ptrINS_18first_class_objectEEEDpT_ENKUlRNS_14plugin_contextEPSG_S3_S5_S5_S5_iS6_E_clESQ_SR_S3_S5_S5_S5_iS6_+0x5a) [0x7fffe008830a]
+ #8 /usr/lib/libirods_client.so.4.2.2(_ZN5irods11plugin_base4callIJPKcP8BytesBufS5_S5_i11irodsProt_tEEENS_5errorEP8rsComm_tRKNSt3__112basic_stringIcNSA_11char_traitsIcEENSA_9allocatorIcEEEEN5boost10shared_ptrINS_18first_class_objectEEEDpT_+0x1af) [0x7fffe0086b7f]
+ #9 /usr/lib/libirods_client.so.4.2.2(_Z11sendRodsMsgN5boost10shared_ptrIN5irods14network_objectEEEPKcP8BytesBufS7_S7_i11irodsProt_t+0x153) [0x7fffe0082cf3]
+ #10 /usr/lib/libirods_client.so.4.2.2(sendStartupPack+0x233) [0x7fffe0082283]
+ #11 /usr/lib/libirods_client.so.4.2.2(connectToRhost+0x55) [0x7fffe0081175]
+ #12 /usr/lib/libirods_client.so.4.2.2(_rcConnect+0x24d) [0x7fffe006d65d]
+ #13 /usr/lib/libirods_client.so.4.2.2(rcConnect+0x6b) [0x7fffe006d3fb]
+ #14 /usr/local/samba/lib/vfs/stor.so(+0x1d1d) [0x7fffe02dad1d]
+
+---
+20180404,
+struct stor_data {
+    rErrMsg_t *err_msg;
+} *vfs_stor_data;
+
