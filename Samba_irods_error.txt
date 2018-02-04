@@ -120,3 +120,43 @@ struct stor_data {
     rErrMsg_t *err_msg;
 } *vfs_stor_data;
 
+Breakpoint 1, stor_connect (handle=0x5555558156a0, service=0x5555557ef5d0 "test",
+    user=0x5555557faad0 "TEST\\davor") at ../source3/modules/vfs_stor.c:99
+99                      vfs_stor_data->irods_conn = rcConnect(
+(gdb) p vfs_stor_data->err_msg
+$1 = (rErrMsg_t *) 0x0
+(gdb) p &vfs_stor_data->err_msg
+$2 = (rErrMsg_t **) 0x555555815748
+(gdb) p &vfs_stor_data->err_msg.status
+$3 = (int *) 0x0
+(gdb) p &vfs_stor_data->err_msg.msg
+$4 = (char (*)[1024]) 0x4
+(gdb) p vfs_stor_data->err_msg.msg
+Cannot access memory at address 0x4
+(gdb) s
+104                             0, &vfs_stor_data->err_msg);
+(gdb) s
+103                             vfs_stor_data->stor_env.rodsZone,
+(gdb) s
+102                             vfs_stor_data->stor_env.rodsUserName,
+(gdb) s
+101                             vfs_stor_data->stor_env.rodsPort,
+(gdb) s
+99                      vfs_stor_data->irods_conn = rcConnect(
+(gdb) s
+100                             vfs_stor_data->stor_env.rodsHost,
+(gdb) s
+99                      vfs_stor_data->irods_conn = rcConnect(
+(gdb) s
+remote addresses: 192.168.1.8 ERROR: _rcConnect: setRhostInfo error, IRODS_HOST is probably not set correctly status = -302000 USER_RODS_HOST_EMPTY
+106             if (vfs_stor_data->irods_conn == NULL) {
+(gdb) p &vfs_stor_data->err_msg.status
+$5 = (int *) 0x4363725ffffb6450
+(gdb) p &vfs_stor_data->err_msg.msg
+$6 = (char (*)[1024]) 0x4363725ffffb6454
+(gdb) c
+Continuing.
+[VFS_STOR] - error iRODS connection: vfs_stor_data->irods_conn == NULL
+
+---
+
