@@ -158,5 +158,26 @@ $6 = (char (*)[1024]) 0x4363725ffffb6454
 Continuing.
 [VFS_STOR] - error iRODS connection: vfs_stor_data->irods_conn == NULL
 
+Forgot to print this during debug session:
+(gdb) p vfs_stor_data->stor_env
+$4 = {rodsUserName = "onnect: setRhostInfo failed\n", '\000' <repeats 35 times>,
+  rodsHost = '\000' <repeats 63 times>, rodsPort = 0, xmsgHost = '\000' <repeats 63 times>, xmsgPort = 0,
+  rodsHome = '\000' <repeats 1087 times>, rodsCwd = "/tempZone/home/davor", '\000' <repeats 1067 times>,
+  rodsAuthScheme = "KRB\000ve", '\000' <repeats 57 times>, rodsDefResource = '\000' <repeats 63 times>,
+  rodsZone = "tempZone", '\000' <repeats 55 times>, rodsLogLevel = 0, rodsAuthFile = '\000' <repeats 255 times>,
+  rodsDebug = '\000' <repeats 63 times>, rodsClientServerPolicy = '\000' <repeats 255 times>,
+  rodsClientServerNegotiation = '\000' <repeats 255 times>, rodsEncryptionKeySize = 0,
+  rodsEncryptionSaltSize = 0, rodsEncryptionNumHashRounds = 0,
+  rodsEncryptionAlgorithm = '\000' <repeats 127 times>, rodsDefaultHashScheme = '\000' <repeats 63 times>,
+  rodsMatchHashPolicy = '\000' <repeats 63 times>, irodsSSLCACertificatePath = '\000' <repeats 1087 times>,
+  irodsSSLCACertificateFile = '\000' <repeats 1087 times>, irodsSSLVerifyServer = '\000' <repeats 1087 times>,
+  irodsSSLCertificateChainFile = '\000' <repeats 1087 times>,
+  irodsSSLCertificateKeyFile = '\000' <repeats 1087 times>, irodsSSLDHParamsFile = '\000' <repeats 1087 times>,
+  irodsCtrlPlaneKey = '\000' <repeats 1087 times>, irodsCtrlPlanePort = 0,
+  irodsCtrlPlaneEncryptionNumHashRounds = 0, irodsCtrlPlaneEncryptionAlgorithm = '\000' <repeats 127 times>,
+  irodsMaxSizeForSingleBuffer = 32, irodsDefaultNumberTransferThreads = 4, irodsTransBufferSizeForParaTrans = 4,
+  irodsPluginHome = '\000' <repeats 1087 times>}
+(gdb)
+
 ---
 
