@@ -1,4 +1,4 @@
-/*
+/*·
  * vfs_stor.c
  * Copyright (C) Davor Vusir, 2018
  *
@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
- *
+ *··
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ *··
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
@@ -46,35 +46,38 @@
 #include "irods/rcConnect.h"
 #include "irods/sockComm.h"
 #include "irods/stringOpr.h"
+//#include "irods/apiPackTable.h"
 
 #undef DBGC_CLASS
 #define DBGC_CLASS DBGC_VFS
 
-struct stor {
+struct stor_data {
 	rcComm_t *irods_conn;
-	rErrMsg_t *errMsg;
+	rErrMsg_t *err_msg;
 //	rodsArguments_t myRodsArgument;
 	rodsEnv stor_env;
-	int reconnFlag;
-};
+	int reconn_flag;
+} *vfs_stor_data;
 
 static int stor_connect(vfs_handle_struct *handle, const char *service,
-				const char *user)
+			const char *user)
 {
 	int status;
 	int snum;
 //	const char *irods_host;
-//	int	irods_port; /* iRODS standard port */
+//	int»····    irods_port; /* iRODS standard port */
 	const char *home_dir = NULL;
+//	rodsEnv init_env;
+//	rErrMsg_t init_err_msg;
 	
-	struct stor *rods_data = NULL;
-	rods_data = talloc_zero(handle->conn, struct stor);
-	if(!rods_data){
-		DEBUG(0,("[VFS_stor: rods_data = talloc_zero() failed\n"));
-	return -1;
+	vfs_stor_data = NULL;
+	vfs_stor_data = talloc_zero(handle->conn, struct stor_data);
+	if(!vfs_stor_data){
+		DEBUG(0,("[VFS_stor: vfs_stor_data = talloc_zero() failed\n"));
+		return -1;
 	}
 	
-	rods_data->reconnFlag = 0;
+	vfs_stor_data->reconn_flag = 0;
 	
 	home_dir = handle->conn->session_info->info->home_directory;
 	DEBUG(1, ("[VFS_STOR] - home_dir: %s\n", home_dir));
@@ -84,36 +87,39 @@ static int stor_connect(vfs_handle_struct *handle, const char *service,
 	home_dir = getenv("HOME");
 	DEBUG(1, ("[VFS_STOR] - HOME env var: %s\n", home_dir));
 	
-	status = getRodsEnv(&rods_data->stor_env);
+	status = getRodsEnv(&vfs_stor_data->stor_env);
+//	DEBUG(1, ("[VFS_STOR] - getRodsEnv stor_env.rodsHost: %s\n", init_env.rodsHost));
+//	*(vfs_stor_data->stor_env.rodsHost) = talloc_strdup(vfs_stor_data, init_env.rodsHost);
+//	vfs_stor_data->stor_env = init_env;
 	DEBUG(1, ("[VFS_STOR] - getRodsEnv stor_env.rodsHost: %s\n",
-			rods_data->stor_env.rodsHost));
+			vfs_stor_data->stor_env.rodsHost));
 	
 	if(status == 0) {
 		DEBUG(1, ("[VFS_STOR] - getRodsEnv, status: %i\n", status));
-		rods_data->irods_conn = rcConnect(
-				rods_data->stor_env.rodsHost,
-				rods_data->stor_env.rodsPort,
-				rods_data->stor_env.rodsUserName,
-				rods_data->stor_env.rodsZone,
-				rods_data->reconnFlag, &rods_data->errMsg);
+		vfs_stor_data->irods_conn = rcConnect(
+			vfs_stor_data->stor_env.rodsHost,
+			vfs_stor_data->stor_env.rodsPort,
+			vfs_stor_data->stor_env.rodsUserName,
+			vfs_stor_data->stor_env.rodsZone,
+			0, &vfs_stor_data->err_msg);
 	}
-	if (rods_data->irods_conn == NULL) {
+	if (vfs_stor_data->irods_conn == NULL) {
 		DEBUG(1, ("[VFS_STOR] - error iRODS connection: %s\n",
-				"rods_data->irods_conn == NULL\n"));
+				"vfs_stor_data->irods_conn == NULL\n"));
 	return -1;
-}
+	}
 	
-	status = clientLogin(rods_data->irods_conn, 0,
-				rods_data->stor_env.rodsAuthScheme);
+	status = clientLogin(vfs_stor_data->irods_conn, 0,
+				vfs_stor_data->stor_env.rodsAuthScheme);
 	DEBUG(1, ("[VFS_STOR] - Efter clientLogin: %i\n", status));
-		
 	
-	SMB_VFS_HANDLE_SET_DATA(handle, rods_data, NULL, struct stor, return -1);
+	SMB_VFS_HANDLE_SET_DATA(handle, vfs_stor_data, NULL,
+			struct stor, return -1);
 	
 	snum = SNUM(handle->conn);
 	
 	
-//rc = SMB_VFS_NEXT_CONNECT(handle, service, user);
+//	rc = SMB_VFS_NEXT_CONNECT(handle, service, user);
 	
 	return status;
 /*
@@ -145,6 +151,7 @@ static int stor_connect(vfs_handle_struct *handle, const char *service,
 //	dvstatus = getRodsEnv(&rods_data->myEnv);
 //	DEBUG(1, ("[VFS_STOR] - Före handle->data, irods_host: %s\n",
 //irods_host));
+
 //	const char *irods_zone_name;
 //	const char *irods_user_name;
 //	const char *irods_auth_scheme;
