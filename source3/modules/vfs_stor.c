@@ -53,7 +53,7 @@
 
 struct stor_data {
 	rcComm_t *irods_conn;
-//	rErrMsg_t *err_msg;
+	rErrMsg_t *err_msg;
 //	rodsArguments_t myRodsArgument;
 	rodsEnv stor_env;
 	int reconn_flag;
@@ -101,7 +101,7 @@ static int stor_connect(vfs_handle_struct *handle, const char *service,
 			vfs_stor_data->stor_env.rodsPort,
 			vfs_stor_data->stor_env.rodsUserName,
 			vfs_stor_data->stor_env.rodsZone,
-			0, &err_msg);
+			0, &vfs_stor_data->err_msg);
 	}
 	if (vfs_stor_data->irods_conn == NULL) {
 		DEBUG(1, ("[VFS_STOR] - error iRODS connection: %s\n",
