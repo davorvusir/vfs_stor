@@ -1,0 +1,17 @@
+20180208:
+The project is stuck. I'm having trouble getting pass rcConnect().
+https://github.com/davorvusir/vfs_stor/blob/master/source3/modules/vfs_stor.c#L113
+
+The failure seems to stem from my passing 'rErrMsg_t err_msg' to rcConnect(). If a pass a pointer
+'rErrMsg_t *err_msg' I, at least, get an error message. But it fails anyway.
+See https://github.com/davorvusir/vfs_stor/blob/master/Samba_irods_error.txt
+
+When looking at the source code for various iCommands 'rErrMsg_t err_msg' is used,
+I have got no idea of what is wrong, but it looks strange that rcConnect() calls '_rcConnect()'
+with 'errMsg' and not '&errMsg'.
+See https://github.com/irods/irods/blob/master/lib/core/src/rcConnect.cpp#L49
+
+I will continue with implementing basic iCommands, 'iput', 'iget' and others. The creation of an
+environment file is possible in spite of the this set back.
+The general idea is: if it compiles, it will work...
+
