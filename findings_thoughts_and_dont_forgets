@@ -1,0 +1,26 @@
+1. iCommands depend on a home directory containing the '.irods' directory which contains the users environment file
+  a) make the function vfs_stor_connect handle a non-existing environment file by mimic the iCommand iinit.
+  b) Use VFS parameters to supply information to 'vfs_connect' for creation of users environment file.
+  
+2. As of today (20180208) vfs_stor uses the home directory attribute in AD (homeDirectory) to get the location
+   of the home directory. The attribute should contain a path on the form '\\fqdn\share[\dir]\%username%', but
+   contains '/data/home/%username%' at the moment to make it possible to setenv("HOME"), see dependency in
+   point 1 above.
+  a) Examine where the smb.conf parameter 'template homedir' is stored in Samba code. The Samba server, Windows
+     and iRODS both don't care if the path to the homedirectory is overridden by Samba as long as the path is 
+     local to iRODS iCommands-code. See https://github.com/irods/irods/blob/master/lib/core/src/getRodsEnv.cpp#L39
+  
+3. The icommands give the user the possibility to create a copy of a file to another storage resource, see
+   https://github.com/irods/irods_client_icommands/blob/master/src/irepl.cpp.
+  a) Examine the possibility to present the iRODS zone as a standalone DFS and create a PEP or MSI to auto-
+     replicate files after 'iput'-ed.
+  b) If it is not necessary to present the iRODS zone as a standalone DFS, create a PEP or MSI to auto-
+     replicate files after 'iput'-ed.
+
+4. Create an OCX to be installed on the Windows client, which presents a contextual menuitem 'iRODS' when
+   right-clicking i file or directory. This will make it possible to write metadata to a file or directory. Also
+   make the OCX present an API/ABI for programmatically setting metadata.
+   See https://github.com/irods/irods_client_icommands/blob/master/src/imeta.cpp
+   
+5. Examine the possibilty to use the Windows built-in syncclient with vfs_stor/iRODS-zone.
+
