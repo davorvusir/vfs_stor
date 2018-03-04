@@ -181,3 +181,116 @@ $4 = {rodsUserName = "onnect: setRhostInfo failed\n", '\000' <repeats 35 times>,
 
 ---
 
+20180302-1:
+INFO: Profiling support unavailable in this build.
+[VFS_STOR] - uid, gid: 11104, 10513
+[VFS_STOR] - home_dir: /data/home/davor
+[VFS_STOR] - home_directory: /data/home/davor
+[VFS_STOR] - HOME env var: /root
+terminating with uncaught exception of type boost::filesystem::filesystem_error: boost::filesystem::status: Permission denied: "/root/.irods/irods_environment.json"
+
+Program received signal SIGABRT, Aborted.
+0x00007ffff397e428 in __GI_raise (sig=sig@entry=6) at ../sysdeps/unix/sysv/linux/raise.c:54
+54      ../sysdeps/unix/sysv/linux/raise.c: No such file or directory.
+
+---
+
+20180203-1:
+(gdb) s
+remote addresses: 192.168.1.8 ERROR: _rcConnect: connectToRhost error, server on rods.test.vusir.se:1247 is probably down status = -305111 USER_SOCK_CONNECT_ERR, Connection refused
+128                 if (conn == NULL) {
+
+20180203-2:
+debug_lookup_classname(smbd): Unknown class
+INFO: Profiling support unavailable in this build.
+[VFS_STOR] - uid, gid: 11104, 10513
+
+Breakpoint 1, stor_connect (handle=0x555555813c50, service=0x5555557ebf90 "test",
+    user=0x5555557ea570 "TEST\\davor") at ../source3/modules/vfs_stor.c:108
+108                 if(auth_pipe_user_ok){
+(gdb) s
+109                     home_dir = handle->conn->session_info->info->home_directory;
+(gdb)
+110                     DEBUG(1, ("[VFS_STOR] - home_dir: %s\n", home_dir));
+(gdb)
+[VFS_STOR] - home_dir: /data/home/davor
+111                     DEBUG(1, ("[VFS_STOR] - home_directory: %s\n",
+(gdb)
+[VFS_STOR] - home_directory: /data/home/davor
+114                     home_dir = getenv("HOME");
+(gdb)
+115                     DEBUG(1, ("[VFS_STOR] - HOME env var: %s\n", home_dir));
+(gdb)
+[VFS_STOR] - HOME env var: /home/admind
+118                     status = getRodsEnv(&env);
+(gdb)
+remote addresses: 192.168.1.8 ERROR: iRODS Exception:
+    file: /tmp/tmpJzsKTL/lib/core/src/irods_environment_properties.cpp
+    function: void irods::environment_properties::capture_json(const std::string &)
+    line: 113
+    code: -1
+    message:
+        [-]     /tmp/tmpJzsKTL/lib/core/src/irods_configuration_parser.cpp:92:irods::error irods::configuration_parser::load_json_object(const std::string &) :  status [Unknown iRODS error]  errno [Operation not permitted] -- message [failed to load file [/home/admind/.irods/irods_environment.json] json error [unable to open /home/admind/.irods/irods_environment.json: Permission denied]]
+
+
+stack trace:
+--------------
+
+Dumping stack trace
+<0>     Offset: 0x65    Address: 0x7fffe751be15 irods::exception::exception(long, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+<1>     Offset: 0xf2    Address: 0x7fffe7518ea2 irods::environment_properties::capture_json(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+<2>     Offset: 0xbb    Address: 0x7fffe7518b4b irods::environment_properties::capture()
+<3>     Offset: 0x33    Address: 0x7fffe7518a03 irods::environment_properties::instance()
+<4>     Offset:         Address: 0x7fffe7504e40 /usr/lib/libirods_common.so.4.2.2(+0x66e40) [0x7fffe7504e40]
+<5>     Offset:         Address: 0x7fffe7503fe5 /usr/lib/libirods_common.so.4.2.2(getRodsEnvFromFile+0x65) [0x7fffe7503fe5]
+<6>     Offset:         Address: 0x7fffe7503ecb /usr/lib/libirods_common.so.4.2.2(_getRodsEnv+0x1b) [0x7fffe7503ecb]
+<7>     Offset:         Address: 0x7fffe7503ea0 /usr/lib/libirods_common.so.4.2.2(getRodsEnv+0x10) [0x7fffe7503ea0]
+<8>     Offset:         Address: 0x7fffe01a7b60 /usr/local/samba/lib/vfs/stor.so(+0x1b60) [0x7fffe01a7b60]
+<9>     Offset:         Address: 0x7ffff7327ab5 /usr/local/samba/lib/private/libsmbd-base-samba4.so(smb_vfs_call_connect+0x4d) [0x7ffff7327ab5]
+<10>    Offset:         Address: 0x7ffff734775c /usr/local/samba/lib/private/libsmbd-base-samba4.so(+0x1ff75c) [0x7ffff734775c]
+<11>    Offset:         Address: 0x7ffff7348811 /usr/local/samba/lib/private/libsmbd-base-samba4.so(make_connection_smb2+0xe1) [0x7ffff7348811]
+<12>    Offset:         Address: 0x7ffff73683d0 /usr/local/samba/lib/private/libsmbd-base-samba4.so(+0x2203d0) [0x7ffff73683d0]
+<13>    Offset:         Address: 0x7ffff73687f2 /usr/local/samba/lib/private/libsmbd-base-samba4.so(+0x2207f2) [0x7ffff73687f2]
+<14>    Offset:         Address: 0x7ffff7367951 /usr/local/samba/lib/private/libsmbd-base-samba4.so(smbd_smb2_request_process_tcon+0x2b1) [0x7ffff7367951]
+<15>    Offset:         Address: 0x7ffff735d3e3 /usr/local/samba/lib/private/libsmbd-base-samba4.so(smbd_smb2_request_dispatch+0x1150) [0x7ffff735d3e3]
+<16>    Offset:         Address: 0x7ffff7361447 /usr/local/samba/lib/private/libsmbd-base-samba4.so(+0x219447) [0x7ffff7361447]
+<17>    Offset:         Address: 0x7ffff736154d /usr/local/samba/lib/private/libsmbd-base-samba4.so(+0x21954d) [0x7ffff736154d]
+<18>    Offset:         Address: 0x7ffff672d4ac /usr/local/samba/lib/private/libtevent.so.0(+0xe4ac) [0x7ffff672d4ac]
+<19>    Offset:         Address: 0x7ffff672dae4 /usr/local/samba/lib/private/libtevent.so.0(+0xeae4) [0x7ffff672dae4]
+<20>    Offset:         Address: 0x7ffff672a7e0 /usr/local/samba/lib/private/libtevent.so.0(+0xb7e0) [0x7ffff672a7e0]
+<21>    Offset:         Address: 0x7ffff67240f1 /usr/local/samba/lib/private/libtevent.so.0(_tevent_loop_once+0x10f) [0x7ffff67240f1]
+<22>    Offset:         Address: 0x7ffff6724408 /usr/local/samba/lib/private/libtevent.so.0(tevent_common_loop_wait+0x25) [0x7ffff6724408]
+<23>    Offset:         Address: 0x7ffff672a882 /usr/local/samba/lib/private/libtevent.so.0(+0xb882) [0x7ffff672a882]
+<24>    Offset:         Address: 0x7ffff67244ab /usr/local/samba/lib/private/libtevent.so.0(_tevent_loop_wait+0x2b) [0x7ffff67244ab]
+<25>    Offset:         Address: 0x7ffff73458ee /usr/local/samba/lib/private/libsmbd-base-samba4.so(smbd_process+0xbed) [0x7ffff73458ee]
+<26>    Offset:         Address: 0x5555555600c7 /usr/local/samba/sbin/smbd(+0xc0c7) [0x5555555600c7]
+<27>    Offset:         Address: 0x7ffff672d4ac /usr/local/samba/lib/private/libtevent.so.0(+0xe4ac) [0x7ffff672d4ac]
+<28>    Offset:         Address: 0x7ffff672dae4 /usr/local/samba/lib/private/libtevent.so.0(+0xeae4) [0x7ffff672dae4]
+<29>    Offset:         Address: 0x7ffff672a7e0 /usr/local/samba/lib/private/libtevent.so.0(+0xb7e0) [0x7ffff672a7e0]
+<30>    Offset:         Address: 0x7ffff67240f1 /usr/local/samba/lib/private/libtevent.so.0(_tevent_loop_once+0x10f) [0x7ffff67240f1]
+<31>    Offset:         Address: 0x7ffff6724408 /usr/local/samba/lib/private/libtevent.so.0(tevent_common_loop_wait+0x25) [0x7ffff6724408]
+<32>    Offset:         Address: 0x7ffff672a882 /usr/local/samba/lib/private/libtevent.so.0(+0xb882) [0x7ffff672a882]
+<33>    Offset:         Address: 0x7ffff67244ab /usr/local/samba/lib/private/libtevent.so.0(_tevent_loop_wait+0x2b) [0x7ffff67244ab]
+<34>    Offset:         Address: 0x5555555610bc /usr/local/samba/sbin/smbd(+0xd0bc) [0x5555555610bc]
+<35>    Offset:         Address: 0x555555563262 /usr/local/samba/sbin/smbd(main+0x18b7) [0x555555563262]
+<36>    Offset:         Address: 0x7ffff3969830 /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf0) [0x7ffff3969830]
+<37>    Offset:         Address: 0x555555559f89 /usr/local/samba/sbin/smbd(_start+0x29) [0x555555559f89]
+
+
+119                     DEBUG(1, ("[VFS_STOR] - getRodsEnv stor_env.rodsHost: %s\n",
+(gdb) c
+Continuing.
+[VFS_STOR] - getRodsEnv stor_env.rodsHost:
+[VFS_STOR] - getRodsEnv, status: 0
+remote addresses: 192.168.1.8 ERROR: _rcConnect: setRhostInfo error, IRODS_HOST is probably not set correctly status = -302000 USER_RODS_HOST_EMPTY
+[VFS_STOR] - error iRODS connection: data->conn == NULL
+
+make_connection_snum: SMB_VFS_CONNECT for service 'test' at '/data/test' failed: Transport endpoint is not connected
+
+Program received signal SIGTERM, Terminated.
+0x00007ffff397e767 in kill () at ../sysdeps/unix/syscall-template.S:84
+84      ../sysdeps/unix/syscall-template.S: No such file or directory.
+(gdb)
+
+---
+
