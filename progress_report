@@ -15,3 +15,77 @@ I will continue with implementing basic iCommands, 'iput', 'iget' and others. Th
 environment file is possible in spite of the this set back.
 The general idea is: if it compiles, it will work...
 
+---
+
+20180304:
+I have recently found out that using Kerberos for authentication is not possible.
+After a succesful Kerberos authentication a ticket is created locally. The iCommands in turn presents this ticket to the iRODS server.
+
+If you logon to a domain joined workstation and mount a Samba file share or use the UNC path to connect, the client computer will forward it's ticket to the Samba server. Unfortunally the server has no way of converting the ticket to a CCNAME (for instance) and in turn present it to the iRODS server. This functionality is not yet implemented.
+
+For now 'native' authentication has to be used.
+
+See:
+https://lists.samba.org/archive/samba/2017-May/208220.html
+https://github.com/samba-team/samba/blob/master/source3/librpc/crypto/gse.c
+https://k5wiki.kerberos.org/wiki/Projects/Credential_Store_extensions
+
+I think Jason Coposky was right when he says that the error is being masked.
+If I run Samba in a gdb session in a user context with sudo privileges (the account created by Ubuntu installer), I get the following error:
+remote addresses: 192.168.1.8 ERROR: environment_properties::capture: missing environment file. should be at [/home/localadmin/.irods/irods_environment.json]
+[VFS_STOR] - getRodsEnv stor_env.rodsHost:
+[VFS_STOR] - getRodsEnv, status: 0
+remote addresses: 192.168.1.8 ERROR: _rcConnect: setRhostInfo error, IRODS_HOST is probably not set correctly status = -302000 USER_RODS_HOST_EMPTY
+
+
+If i run Samba in a gdb session as root, I get the following error:
+Breakpoint 1, stor_connect (handle=0x555555814340, service=0x5555557ecb00 "test",
+    user=0x5555557f3100 "TEST\\davor") at ../source3/modules/vfs_stor.c:114
+114                 if(auth_pipe_user_ok){
+(gdb) s
+115                     home_dir = handle->conn->session_info->info->home_directory;
+(gdb)
+116                     DEBUG(1, ("[VFS_STOR] - home_dir: %s\n", home_dir));
+(gdb)
+[VFS_STOR] - home_dir: /data/home/davor
+117                     DEBUG(1, ("[VFS_STOR] - home_directory: %s\n",
+(gdb)
+[VFS_STOR] - home_directory: /data/home/davor
+120                     home_dir = getenv("HOME");
+(gdb)
+121                     DEBUG(1, ("[VFS_STOR] - HOME env var: %s\n", home_dir));
+(gdb)
+[VFS_STOR] - HOME env var: /root
+124                     status = getRodsEnv(&env);
+(gdb)
+terminating with uncaught exception of type boost::filesystem::filesystem_error: boost::filesystem::status: Permission denied: "/root/.irods/irods_environment.json"
+
+
+When Samba is started through /etc/init.d, I get the following error:
+[2018/03/04 07:01:39.469744,  1] ../source3/modules/vfs_stor.c:116(stor_connect)
+  [VFS_STOR] - home_dir: /data/home/davor
+[2018/03/04 07:01:39.469803,  1] ../source3/modules/vfs_stor.c:118(stor_connect)
+  [VFS_STOR] - home_directory: /data/home/davor
+[2018/03/04 07:01:39.469857,  1] ../source3/modules/vfs_stor.c:121(stor_connect)
+  [VFS_STOR] - HOME env var: (null)
+remote addresses: 192.168.1.8 ERROR: environment_properties::capture: missing environment file. should be at [/var/lib/irods/.irods/irods_environment.json]
+[2018/03/04 07:01:39.473358,  1] ../source3/modules/vfs_stor.c:126(stor_connect)
+  [VFS_STOR] - getRodsEnv stor_env.rodsHost:
+[2018/03/04 07:01:39.473440,  1] ../source3/modules/vfs_stor.c:130(stor_connect)
+  [VFS_STOR] - getRodsEnv, status: 0
+remote addresses: 192.168.1.8 ERROR: _rcConnect: setRhostInfo error, IRODS_HOST is probably not set correctly status = -302000 USER_RODS_HOST_EMPTY
+[2018/03/04 07:01:39.474017,  1] ../source3/modules/vfs_stor.c:140(stor_connect)
+  [VFS_STOR] - error iRODS connection: data->conn == NULL
+
+When getRodsEnv() re-reads the environment file, via sendStartUpPack() and rcConnect(), it has lost knowledge of the calling user. getRodsEnv(), when called at first hand, works fine, reads the AD user's environment file. But called in fourth hand/level (rcConnect() -> _rcConnect() -> connectToRhost() -> sendStartUpPack() -> getRodsEnv()) somewhere along the line the function looses track of the actual user and 'HOME' variable and starts to read the potential environment file of the account running Samba.
+
+Does this make sense?
+
+Samba has got a set of functions; become_user(), become_user_permanently() and others which might be helpful. As of today I have done the connection attempts within the VFS modules 'stor_connect()' function. It might work if I put the iRODS's connection function in separate VFS functions and use 'become_XXX()'.
+
+If the above doesn't work, I have to conclude that I'm too much of a novice but also that this project is not going to fly.
+
+https://groups.google.com/forum/#!topic/iROD-Chat/mb-52rY7EZg
+
+---
+
