@@ -87,7 +87,6 @@ static bool connect_to_irods(vfs_handle_struct *handle)
     
     conn = talloc_zero(handle->conn, rcComm_t);
     if(conn){
-        vfs_stor_uid = get_current_uid(handle->conn);
         if(auth_pipe_user_ok){
             DEBUG(1, ("[VFS_STOR] - home_dir: %s\n", home_dir));
             DEBUG(1, ("[VFS_STOR] - home_directory: %s\n",
