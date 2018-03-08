@@ -30,7 +30,8 @@ and 'secure_path' using visudo.
 Download Samba source files: wget https://download.samba.org/pub/samba/stable/samba-4.7.3.tar.gz.
 I usually put it in /usr/src/samba/samba-M.m.x. Extract the archive and compile:
 
-./configure --without-ad-dc --enable-debug --enable-developer --enable-selftest --with-profiling-data --gdbtest --valgrind-log=/usr/src/samba/valgrind/samba-4.7.3/valgrind.log --jobs=2
+./configure --without-ad-dc --enable-debug --enable-developer --enable-selftest --with-profiling-data \
+--gdbtest --valgrind-log=/usr/src/samba/valgrind/samba-4.7.3/valgrind.log --jobs=2
 make
 make install
 
@@ -102,7 +103,8 @@ by issuing the command 'iadmin aua davor davor@DATADELIKATESSER.SE'
 With the Windows domain in place you have to create a service account for iRODS to use.
 I used the account name (service principal) "irods" and create a keytab for iRODS server application to use:
 
-C:\Users\Administrator>ktpass /princ irodsserver/rods.datadelikatesser.se@DATADELIKATESSER.SE /pass P@ssW0rd /crypto RC4-HMAC-NT /mapuser DATADELIKATESS\irods /out irods.keytab
+C:\Users\Administrator>ktpass /princ irodsserver/rods.datadelikatesser.se@DATADELIKATESSER.SE
+                       /pass P@ssW0rd /crypto RC4-HMAC-NT /mapuser DATADELIKATESS\irods /out irods.keytab
 Targeting domain controller: DC1.datadelikatesser.se
 Using legacy password setting method
 Successfully mapped irodsserver/rods.datadelikatesser.se to irods.
@@ -110,7 +112,8 @@ WARNING: pType and account type do not match. This might cause problems.
 Key created.
 Output keytab to irods.keytab:
 Keytab version: 0x502
-keysize 79 irodsserver/rods.datadelikatesser.se@DATADELIKATESSER.SE ptype 0 (KRB5_NT_UNKNOWN) vno 3 etype 0x17 (RC4-HMAC) keylength 16 (0x0ae967c026ba385f0fd173a53fec533c)
+keysize 79 irodsserver/rods.datadelikatesser.se@DATADELIKATESSER.SE ptype 0 (KRB5_NT_UNKNOWN)
+vno 3 etype 0x17 (RC4-HMAC) keylength 16 (0x0ae967c026ba385f0fd173a53fec533c)
 
 C:\Users\Administrator>
 
@@ -189,3 +192,22 @@ KVNO Principal
    3 SAMBA$@DATADELIKATESSER.SE (aes256-cts-hmac-sha1-96)
    3 SAMBA$@DATADELIKATESSER.SE (arcfour-hmac)
 davor@samba:~$
+
+--
+Out of bonds for now (20180308):
+C:\Users\Administrator>ktpass /princ rodsproxy@DATADELIKATESSER.SE /crypto RC4-HMAC-NT
+                       /mapuser DATADELIKATESS\rodsproxy /out rodsproxy.keytab /pass P@ssw0rd
+Targeting domain controller: DC1.datadelikatesser.se
+Using legacy password setting method
+Failed to set property 'servicePrincipalName' to 'rodsproxy' on Dn
+'CN=iRODS Proxy Account,CN=Users,DC=datadelikatesser,DC=se': 0x13.
+WARNING: Unable to set SPN mapping data.
+If rodsproxy already has an SPN mapping installed for rodsproxy, this is no cause for concern.
+WARNING: pType and account type do not match. This might cause problems.
+Key created.
+Output keytab to rodsproxy.keytab:
+Keytab version: 0x502
+keysize 57 rodsproxy@DATADELIKATESSER.SE ptype 0 (KRB5_NT_UNKNOWN) vno 3 etype 0x17
+(RC4-HMAC) keylength 16 (0x0ae967c026ba385f0fd173a53fec533c)
+
+C:\Users\Administrator>dir
