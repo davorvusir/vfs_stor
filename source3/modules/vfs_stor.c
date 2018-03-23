@@ -2,6 +2,8 @@
  * vfs_stor.c
  * Copyright (C) Davor Vusir, 2018
  *
+ * 20180323
+ * 
  * Created from Skeleton VFS module.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,7 +25,7 @@
  *  stor:irods_host = "rods.datadelikatesser.se"
  *  stor:irods_port = 1247
  *  stor:irods_zone_name = "tempZone"
- *  stor:irods_auth_scheme = "KRB"
+ *  stor:irods_auth_scheme = "PAM"
  * "irods_authentication_scheme": "KRB"
 */
 
@@ -34,7 +36,9 @@
 #include "lib/param/param.h"
 #include "lib/param/loadparm.h"
 #include "auth.h"
+#include "smb.h"
 #include "smbd/proto.h"
+#include "lib/winbind_util.h"
 
 /* iRODS basics */
 #include "irods/rods.h"
@@ -50,105 +54,182 @@
 #define DBGC_CLASS DBGC_VFS
 
 
-rcComm_t *conn;
-rErrMsg_t err_msg;
-rodsEnv env;
-int reconn_flag;
-
-static bool connect_to_irods(vfs_handle_struct *handle);
-
-static bool connect_to_irods(vfs_handle_struct *handle)
-{
-    bool connected = false;
-    bool auth_pipe_user_ok = false;
-    int status = 0;
-    uid_t vfs_stor_uid;
-    gid_t vfs_stor_gid;
-    uint64_t vfs_stor_vuid;
-    uint64_t vfs_stor_vgid;
-    const char *home_dir = NULL;
-    reconn_flag = NO_RECONN;
-    
-    vfs_stor_uid = handle->conn->session_info->unix_token->uid;
-    vfs_stor_gid = handle->conn->session_info->unix_token->gid;
-    vfs_stor_vuid = get_current_vuid(handle->conn);
-//  become_user_permanently(vfs_stor_uid, vfs_stor_gid);
-//  auth_pipe_user_ok = become_authenticated_pipe_user(
-//                                        handle->conn->session_info);
-    auth_pipe_user_ok = smbd_become_authenticated_pipe_user(
-                                            handle->conn->session_info);
-    
-//    auth_pipe_user_ok = become_user(handle->conn, vfs_stor_vuid);
-    DEBUG(1, ("[VFS_STOR] - uid, gid, vuid: %i, %i, %lu\n",
-                            vfs_stor_uid, vfs_stor_gid, vfs_stor_vuid));
- 
-    DEBUG(1, ("[VFS_STOR] - auth_pipe_user_ok = %i\n",
-                            auth_pipe_user_ok));
-    
-    conn = talloc_zero(handle->conn, rcComm_t);
-    if(conn){
-        if(auth_pipe_user_ok){
-            DEBUG(1, ("[VFS_STOR] - home_dir: %s\n", home_dir));
-            DEBUG(1, ("[VFS_STOR] - home_directory: %s\n",
-			handle->conn->session_info->info->home_directory));
-//          setenv("HOME", home_dir, 1);
-            home_dir = getenv("HOME");
-            DEBUG(1, ("[VFS_STOR] - HOME env var: %s\n", home_dir));
-
-            /* Read the user's environment file. */
-            status = getRodsEnv(&env);
-            DEBUG(1, ("[VFS_STOR] - getRodsEnv stor_env.rodsHost: %s\n",
-                        	env.rodsHost));
-            /* If the reading of the environment went fine, it's time to connect
-             * to the iRODS server. */
-            if(status == 0) {
-                DEBUG(1, ("[VFS_STOR] - getRodsEnv, status: %i\n", status));
-                conn = rcConnect(env.rodsHost,
-                                    env.rodsPort, env.rodsUserName,
-                                    env.rodsZone, reconn_flag,
-                                    &err_msg);
-                /* rcConnect() -> _rcConnect() -> ... -> sendStartupPack()
-                 * -> getRodsEnv()
-                 */
-                DEBUG(1, ("[VFS_STOR] - getRodsEnv stor_env.rodsHost: %s\n",
-                        	env.rodsHost));
- 
-                }
-            }
-
-            if (conn == NULL) {
-		DEBUG(1, ("[VFS_STOR] - error iRODS connection: %s\n",
-				"data->conn == NULL\n"));
-                SMB_VFS_NEXT_DISCONNECT(handle);
-                return -1;
-            }
-            /* We have got a connection. Time to login. */
-            status = clientLogin(conn, NO_RECONN, env.rodsAuthScheme);
-            DEBUG(1, ("[VFS_STOR] - clientLogin, status: %i\n", status));
-
-            /* Store the connection and associated data to be reused
-             * for the reminder of the session. */
-            SMB_VFS_HANDLE_SET_DATA(handle, conn, NULL, rcComm_t, return -1);
-	}
-    
-    return connected;
-}
+struct vfs_stor {
+    struct passwd *act_user;
+    rcComm_t *conn;
+    rodsEnv env;
+    int reconn_flag;
+    rErrMsg_t err_msg;
+};
 
 static int stor_connect(vfs_handle_struct *handle, const char *service,
 			const char *user)
 {
-    bool connected = false;
-        
-    connected = connect_to_irods(handle);
-    if(connected)
-    {
-        DEBUG(1, ("[VFS_STOR] - Connected to iRODS = %i\n",
-                            connected));
-        return 0;
-    } else
-    {
+    bool auth_pipe_user_ok = false;
+    int status;
+    int conn_return = 0;
+    uid_t vfs_stor_uid;
+    gid_t vfs_stor_gid;
+    uint64_t vfs_stor_vuid;
+//    uint64_t vfs_stor_vgid;
+//    const char *home_dir = NULL;
+//    char *vfs_stor_uid2;
+//    struct passwd *vfs_stor_passwd;
+    char *home_path, *home_path_tmp;
+    
+    /* iRODS environment */
+    struct vfs_stor *stor_data;
+    const char *irods_host;
+    int irods_port;
+    const char *irods_zone_name;
+    const char *irods_home, *irods_home_tmp;
+    const char *irods_cwd, *irods_cwd_tmp;
+    const char *irods_auth_scheme;
+    int irods_size_single_buffer;
+    int irods_def_trans_threads;
+    int irods_transbuf_paratransf;
+    int log_level = 1;
+    int reconn_flag;
+    
+    vfs_stor_uid = handle->conn->session_info->unix_token->uid;
+    vfs_stor_gid = handle->conn->session_info->unix_token->gid;
+    
+    DEBUG(1, (__location__ ": cnum[%u], connectpath[%s]\n",
+		   (unsigned)handle->conn->cnum,
+                    handle->conn->connectpath));
+
+//    status = SMB_VFS_NEXT_CONNECT(handle, service, user);
+//	if (status < 0) {
+//		return status;
+//    }    
+ 
+    stor_data = talloc_zero(handle->conn, struct vfs_stor);
+    if (stor_data == NULL) {
+        DEBUG(1, ("[VFS_STOR] - talloc_zero - vfs_stor: %s\n",
+				"stor_data == NULL\n"));
+        errno = ENOMEM;
         return -1;
     }
+ 
+    irods_host = lp_parm_const_string(SNUM(handle->conn),
+					"stor", "irods_host",
+					"rodsserver.domain.tld");
+    irods_port = lp_parm_int(SNUM(handle->conn),
+				"stor", "irods_port",
+				1247);
+    irods_zone_name = lp_parm_const_string(SNUM(handle->conn),
+					"stor", "irods_zone_name",
+					"Zone needs to be set!");
+    irods_home_tmp = lp_parm_const_string(SNUM(handle->conn),
+					"stor", "irods_home",
+					"rodsHome needs to be set!");
+    irods_cwd_tmp = lp_parm_const_string(SNUM(handle->conn),
+					"stor", "irods_cwd",
+					"rodsCwd needs to be set!");
+    irods_auth_scheme = lp_parm_const_string(SNUM(handle->conn),
+					"stor", "irods_auth_scheme",
+					"native");
+    irods_size_single_buffer = lp_parm_int(SNUM(handle->conn),
+				"stor", "irods_size_single_buffer",
+				32);
+    irods_def_trans_threads = lp_parm_int(SNUM(handle->conn),
+				"stor", "irods_def_trans_threads",
+				4);
+    irods_transbuf_paratransf = lp_parm_int(SNUM(handle->conn),
+				"stor", "irods_transbuf_paratransf",
+				4);
+    conn_return = lp_parm_int(SNUM(handle->conn),
+				"stor", "conn_return",
+				0);
+    log_level = lp_parm_int(SNUM(handle->conn),
+				"stor", "log_level",
+				1);
+    
+    /* Set iRODS log level */
+//    setenv("IRODS_LOG_LEVEL", log_level, 1);
+    
+    irods_cwd = talloc_strdup_append((char *)irods_cwd_tmp, handle->conn->session_info->unix_info->sanitized_username);
+    irods_home = talloc_strdup_append((char *)irods_home_tmp, handle->conn->session_info->unix_info->sanitized_username);
+    
+    strncpy(stor_data->env.rodsUserName, handle->conn->session_info->unix_info->sanitized_username,
+            strlen(handle->conn->session_info->unix_info->sanitized_username));
+    strncpy(stor_data->env.rodsHost, irods_host, strlen(irods_host));
+    stor_data->env.rodsPort = irods_port;
+    strncpy(stor_data->env.rodsZone, irods_zone_name, strlen(irods_zone_name));
+    strncpy(stor_data->env.rodsHome, irods_home, strlen(irods_home));
+    strncpy(stor_data->env.rodsCwd, irods_cwd, strlen(irods_cwd));
+    strncpy(stor_data->env.rodsAuthScheme, irods_auth_scheme, strlen(irods_auth_scheme));
+    stor_data->env.irodsMaxSizeForSingleBuffer = irods_size_single_buffer;
+    stor_data->env.irodsDefaultNumberTransferThreads = irods_def_trans_threads;
+    stor_data->env.irodsTransBufferSizeForParaTrans = irods_transbuf_paratransf;
+    
+    reconn_flag = NO_RECONN;
+    
+    DEBUG(1, ("[VFS_STOR] - stor_data->env.rodsUserName: %s\n",
+                            stor_data->env.rodsUserName));
+    DEBUG(1, ("[VFS_STOR] - stor_data->env.rodsHost: %s\n",
+                            stor_data->env.rodsHost));
+    DEBUG(1, ("[VFS_STOR] - stor_data->env.rodsPort: %i\n",
+                            stor_data->env.rodsPort));
+    DEBUG(1, ("[VFS_STOR] - stor_data->env.rodsZone: %s\n",
+                            stor_data->env.rodsZone));
+    DEBUG(1, ("[VFS_STOR] - stor_data->env.rodsHome: %s\n",
+                            stor_data->env.rodsHome));
+    DEBUG(1, ("[VFS_STOR] - stor_data->env.rodsCwd: %s\n",
+                            stor_data->env.rodsCwd));
+    DEBUG(1, ("[VFS_STOR] - stor_data->env.rodsAuthScheme: %s\n",
+                            stor_data->env.rodsAuthScheme));
+    DEBUG(1, ("[VFS_STOR] - stor_data->env.irodsMaxSizeForSingleBuffer: %i\n",
+                            stor_data->env.irodsMaxSizeForSingleBuffer));
+    DEBUG(1, ("[VFS_STOR] - stor_data->env.irodsDefaultNumberTransferThreads: %i\n",
+                            stor_data->env.irodsDefaultNumberTransferThreads));
+    DEBUG(1, ("[VFS_STOR] - stor_data->env.irodsTransBufferSizeForParaTrans: %i\n",
+                            stor_data->env.irodsTransBufferSizeForParaTrans));
+
+    vfs_stor_vuid = get_current_vuid(handle->conn);
+    auth_pipe_user_ok = become_user(handle->conn, handle->conn->vuid);
+    stor_data->act_user = getpwuid(geteuid());
+    
+    status = setuid(geteuid());
+//    DEBUG(1, ("[VFS_STOR] - seteuid() status: %i\n", status));
+    
+    DEBUG(1, ("[VFS_STOR] - uid, gid, vuid: %i, %i, %lu\n",
+                            vfs_stor_uid, vfs_stor_gid, vfs_stor_vuid));
+    DEBUG(1, ("[VFS_STOR] - USER, HOME: %s, %s\n",
+                            stor_data->act_user->pw_name,
+                            stor_data->act_user->pw_dir));
+    setenv("USER", stor_data->act_user->pw_name, 1);
+    setenv("HOME", stor_data->act_user->pw_dir, 1);
+    DEBUG(1, ("[VFS_STOR] - USER - getenv: %s\n",
+                        getenv("USER")));
+    DEBUG(1, ("[VFS_STOR] - vfs_stor_uid, vfs_stor_gid: %i, %i\n",
+                            vfs_stor_uid, vfs_stor_gid));
+    DEBUG(1, ("[VFS_STOR] - HOME - getenv: %s\n",
+                        getenv("HOME")));
+    DEBUG(1, ("[VFS_STOR] - UID - getenv: %s\n",
+                        getenv("UID")));
+    DEBUG(1, ("[VFS_STOR] - UID - geteuid(), getuid() = %i, %i\n",
+                        geteuid(), getuid()));
+    DEBUG(1, ("[VFS_STOR] - char *user: %s\n", user));
+    
+//    status = getRodsEnvFromEnv(&stor_data->env);
+    SMB_VFS_HANDLE_SET_DATA(handle, stor_data, NULL, struct vfs_stor, return -1);
+    
+//    stor_data->conn = _rcConnect(stor_data->env.rodsHost, stor_data->env.rodsPort,
+//                                stor_data->env.rodsUserName, stor_data->env.rodsZone,
+//                                NULL, NULL, &stor_data->err_msg, 0, reconn_flag);
+
+    stor_data->conn = rcConnect(stor_data->env.rodsHost, stor_data->env.rodsPort,
+                                stor_data->env.rodsUserName, stor_data->env.rodsZone,
+                                reconn_flag, &stor_data->err_msg);
+    if(stor_data->conn){
+        DEBUG(1, ("[VFS_STOR] - stor_data->conn: %s\n",
+                            "Tydligen inte NULL!"));
+    }
+//    SMB_VFS_HANDLE_SET_DATA(handle, stor_data, NULL, struct vfs_stor, return -1);
+
+    /* All OK. */
+    return conn_return;
 
 /*	This test environment uses the home directory attribute in AD
 	(homeDirectory) to get the location of the home directory.
@@ -172,7 +253,7 @@ static int stor_connect(vfs_handle_struct *handle, const char *service,
 static void stor_disconnect(vfs_handle_struct *handle)
 {
         /* User has logged out or disconnected from server. */
-	SMB_VFS_HANDLE_GET_DATA(handle, conn, rcComm_t, return -1);
-	rcDisconnect(conn);
-	SMB_VFS_NEXT_DISCONNECT(handle);
+//	SMB_VFS_HANDLE_GET_DATA(handle, conn, rcComm_t, return -1);
+//	rcDisconnect(conn);
+//	SMB_VFS_NEXT_DISCONNECT(handle);
 }
