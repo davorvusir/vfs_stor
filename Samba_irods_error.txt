@@ -294,3 +294,177 @@ Program received signal SIGTERM, Terminated.
 
 ---
 
+20180323, commit e05d487:
+tail -100 /var/lib/irods/log/rodsServerLog.2018.03.21: 
+Mar 22 05:53:21 pid:1294 remote addresses: 192.168.1.8 ERROR: readWorkerTask - readStartupPack failed. -115000
+Mar 23 05:58:17 pid:1294 remote addresses: 192.168.1.8 ERROR: readWorkerTask - readStartupPack failed. -4000
+
+https://github.com/irods/irods/blob/4-2-stable/lib/core/include/rodsErrorTable.h:
+NEW_ERROR(SYS_HEADER_READ_LEN_ERR, -4000)
+NEW_ERROR(SYS_SOCK_READ_TIMEDOUT, -115000)
+
+Output from gdb:
+The program being debugged has been started already.
+Start it from the beginning? (y or n) y
+Starting program: /usr/local/samba/sbin/smbd -i
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+smbd version 4.7.3 started.
+Copyright Andrew Tridgell and the Samba Team 1992-2017
+debug_lookup_classname(smbd): Unknown class
+Registered MSG_REQ_POOL_USAGE
+Registered MSG_REQ_DMALLOC_MARK and LOG_CHANGED
+rlimit_max: increasing rlimit_max (1024) to minimum Windows limit (16384)
+Processing section "[zoner]"
+interpret_interface: Adding interface 192.168.1.8/24
+added interface 192.168.1.8/24 ip=192.168.1.8 bcast=192.168.1.255 netmask=255.255.255.0
+interpret_interface: Adding interface 127.0.0.1/8
+added interface 127.0.0.1/8 ip=127.0.0.1 bcast=127.255.255.255 netmask=255.0.0.0
+INFO: Profiling support unavailable in this build.
+waiting for connections
+samba_tevent: EPOLL_CTL_DEL EBADF for fde[0x5555557e00c0] mpx_fde[(nil)] fd[28] - disabling
+Could not find child 15570 -- ignoring
+Processing section "[zoner]"
+Initialising default vfs hooks
+vfs_find_backend_entry called for /[Default VFS]/
+Successfully added vfs backend '/[Default VFS]/'
+vfs_find_backend_entry called for posixacl
+Successfully added vfs backend 'posixacl'
+Initialising custom vfs hooks from [/[Default VFS]/]
+vfs_find_backend_entry called for /[Default VFS]/
+Successfully loaded vfs module [/[Default VFS]/] with the new modules system
+vfswrap_fs_capabilities: timestamp resolution of sec available on share IPC$, directory /tmp
+vfs_ChDir to /tmp
+vfs_ChDir got /tmp
+     dfs_GetDFSReferral: struct dfs_GetDFSReferral
+        in: struct dfs_GetDFSReferral
+            req: struct dfs_GetDFSReferral_in
+                max_referral_level       : 0x0003 (3)
+                servername               : '\isamba\zoner'
+vfs_ChDir to /
+vfs_ChDir got /
+Initialising default vfs hooks
+Initialising custom vfs hooks from [/[Default VFS]/]
+vfs_find_backend_entry called for /[Default VFS]/
+Successfully loaded vfs module [/[Default VFS]/] with the new modules system
+Initialising custom vfs hooks from [stor]
+vfs_find_backend_entry called for stor
+vfs module [stor] not loaded - trying to load...
+vfs_find_backend_entry called for stor
+Successfully added vfs backend 'stor'
+vfs_find_backend_entry called for stor
+Successfully loaded vfs module [stor] with the new modules system
+../source3/modules/vfs_stor.c:97: cnum[2647799042], connectpath[/data/zone]
+[VFS_STOR] - stor_data->env.rodsUserName: davor
+[VFS_STOR] - stor_data->env.rodsHost: rods.test.vusir.se
+[VFS_STOR] - stor_data->env.rodsPort: 1247
+[VFS_STOR] - stor_data->env.rodsZone: tempZone
+[VFS_STOR] - stor_data->env.rodsHome: /tempZone/home/davor
+[VFS_STOR] - stor_data->env.rodsCwd: /tempZone/home/davor
+[VFS_STOR] - stor_data->env.rodsAuthScheme: native
+[VFS_STOR] - stor_data->env.irodsMaxSizeForSingleBuffer: 32
+[VFS_STOR] - stor_data->env.irodsDefaultNumberTransferThreads: 4
+[VFS_STOR] - stor_data->env.irodsTransBufferSizeForParaTrans: 4
+[VFS_STOR] - uid, gid, vuid: 11104, 10513, 0
+[VFS_STOR] - USER, HOME: davor, /data/home/davor
+[VFS_STOR] - USER - getenv: davor
+[VFS_STOR] - vfs_stor_uid, vfs_stor_gid: 11104, 10513
+[VFS_STOR] - HOME - getenv: /data/home/davor
+[VFS_STOR] - UID - getenv: (null)
+[VFS_STOR] - UID - geteuid(), getuid() = 11104, 11104
+[VFS_STOR] - char *user:
+DEBUG: irods_authentication_file is not defined
+DEBUG: irods_ssl_ca_certificate_path is not defined
+DEBUG: irods_ssl_ca_certificate_file is not defined
+DEBUG: irods_ssl_verify_server is not defined
+DEBUG: irods_ssl_certificate_chain_file is not defined
+DEBUG: irods_ssl_certificate_key_file is not defined
+DEBUG: irods_ssl_dh_params_file is not defined
+DEBUG: irods_server_control_plane_key is not defined
+DEBUG: irods_server_control_plane_encryption_num_hash_rounds is not defined
+DEBUG: irods_server_control_plane_encryption_algorithm is not defined
+DEBUG: irods_server_control_plane_port is not defined
+DEBUG: xmsg_host is not defined
+DEBUG: xmsg_port is not defined
+DEBUG: irods_client_server_policy is not defined
+DEBUG: irods_client_server_negotiation is not defined
+DEBUG: irods_encryption_key_size is not defined
+DEBUG: irods_encryption_salt_size is not defined
+DEBUG: irods_encryption_num_hash_rounds is not defined
+DEBUG: irods_encryption_algorithm is not defined
+DEBUG: irods_default_hash_scheme is not defined
+DEBUG: irods_match_hash_policy is not defined
+DEBUG: irods_authentication_file is not defined
+DEBUG: irods_ssl_ca_certificate_path is not defined
+DEBUG: irods_ssl_ca_certificate_file is not defined
+DEBUG: irods_ssl_verify_server is not defined
+DEBUG: irods_ssl_certificate_chain_file is not defined
+DEBUG: irods_ssl_certificate_key_file is not defined
+DEBUG: irods_ssl_dh_params_file is not defined
+DEBUG: irods_server_control_plane_key is not defined
+DEBUG: irods_server_control_plane_encryption_num_hash_rounds is not defined
+DEBUG: irods_server_control_plane_encryption_algorithm is not defined
+DEBUG: irods_server_control_plane_port is not defined
+DEBUG: resolved plugin home [/usr/lib/irods/plugins/network/]
+DEBUG: load_plugin - calling plugin_factory() in [/usr/lib/irods/plugins/network/libtcp_client.so]
+DEBUG: load_plugin - loaded [tcp_client]
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007fffdff16403 in boost::unordered::detail::table_impl<boost::unordered::detail::map<std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const, boost::any> >, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, boost::any, irods::irods_string_hash, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > > >::operator[](std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) () from /usr/lib/libirods_client.so.4.2.2
+(gdb) bt
+#0  0x00007fffdff16403 in boost::unordered::detail::table_impl<boost::unordered::detail::map<std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const, boost::any> >, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, boost::any, irods::irods_string_hash, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > > >::operator[](std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) () from /usr/lib/libirods_client.so.4.2.2
+#1  0x00007fffdff5730a in irods::error irods::plugin_base::call<char const*, BytesBuf*, BytesBuf*, BytesBuf*, int, irodsProt_t>(rsComm_t*, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, boost::shared_ptr<irods::first_class_object>, char const*, BytesBuf*, BytesBuf*, BytesBuf*, int, irodsProt_t)::{lambda(irods::plugin_context&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >*, char const*, BytesBuf*, BytesBuf*, BytesBuf*, int, irodsProt_t)#1}::operator()(irods::plugin_context&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >*, char const*, BytesBuf*, BytesBuf*, BytesBuf*, int, irodsProt_t) const () from /usr/lib/libirods_client.so.4.2.2
+#2  0x00007fffdff55b7f in irods::error irods::plugin_base::call<char const*, BytesBuf*, BytesBuf*, BytesBuf*, int, irodsProt_t>(rsComm_t*, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, boost::shared_ptr<irods::first_class_object>, char const*, BytesBuf*, BytesBuf*, BytesBuf*, int, irodsProt_t) () from /usr/lib/libirods_client.so.4.2.2
+#3  0x00007fffdff51cf3 in sendRodsMsg(boost::shared_ptr<irods::network_object>, char const*, BytesBuf*, BytesBuf*, BytesBuf*, int, irodsProt_t) ()
+   from /usr/lib/libirods_client.so.4.2.2
+#4  0x00007fffdff51283 in sendStartupPack () from /usr/lib/libirods_client.so.4.2.2
+#5  0x00007fffdff50175 in connectToRhost () from /usr/lib/libirods_client.so.4.2.2
+#6  0x00007fffdff3c65d in _rcConnect () from /usr/lib/libirods_client.so.4.2.2
+#7  0x00007fffe01aa84e in stor_connect (handle=0x555555815150, service=0x5555557ef6c0 "zoner", user=0x5555557f9ae0 "\016")
+    at ../source3/modules/vfs_stor.c:216
+#8  0x00007ffff7327ab5 in smb_vfs_call_connect (handle=0x555555815150, service=0x5555557ef6c0 "zoner", user=0x5555557f9ae0 "\016")
+    at ../source3/smbd/vfs.c:1549
+#9  0x00007ffff734775c in make_connection_snum (xconn=0x5555557e0d90, conn=0x5555557fc460, snum=0, vuser=0x5555557f95c0, pdev=0x7ffff74b04ab "???")
+    at ../source3/smbd/service.c:651
+#10 0x00007ffff7348811 in make_connection_smb2 (req=0x5555557e3240, tcon=0x5555557d8b80, snum=0, vuser=0x5555557f95c0, pdev=0x7ffff74b04ab "???",
+    pstatus=0x7fffffffd8e0) at ../source3/smbd/service.c:960
+#11 0x00007ffff73683d0 in smbd_smb2_tree_connect (req=0x5555557e3240, in_path=0x5555557e35d0 "\\\\isamba\\zoner", out_share_type=0x5555557e3848 "",
+    out_share_flags=0x5555557e384c, out_capabilities=0x5555557e3850, out_maximal_access=0x5555557e3854, out_tree_id=0x5555557e3858,
+    disconnect=0x5555557e385c) at ../source3/smbd/smb2_tcon.c:309
+#12 0x00007ffff73687f2 in smbd_smb2_tree_connect_send (mem_ctx=0x5555557e3240, ev=0x5555557c5e40, smb2req=0x5555557e3240,
+    in_path=0x5555557e35d0 "\\\\isamba\\zoner") at ../source3/smbd/smb2_tcon.c:415
+#13 0x00007ffff7367951 in smbd_smb2_request_process_tcon (req=0x5555557e3240) at ../source3/smbd/smb2_tcon.c:93
+#14 0x00007ffff735d3e3 in smbd_smb2_request_dispatch (req=0x5555557e3240) at ../source3/smbd/smb2_server.c:2586
+#15 0x00007ffff7361447 in smbd_smb2_io_handler (xconn=0x5555557e0d90, fde_flags=1) at ../source3/smbd/smb2_server.c:3895
+#16 0x00007ffff736154d in smbd_smb2_connection_handler (ev=0x5555557c5e40, fde=0x5555557e0b50, flags=1, private_data=0x5555557e0d90)
+    at ../source3/smbd/smb2_server.c:3933
+#17 0x00007ffff672d4ac in epoll_event_loop (epoll_ev=0x5555557d72a0, tvalp=0x7fffffffdd00) at ../lib/tevent/tevent_epoll.c:728
+#18 0x00007ffff672dae4 in epoll_event_loop_once (ev=0x5555557c5e40, location=0x7ffff74a6188 "../source3/smbd/process.c:4127")
+    at ../lib/tevent/tevent_epoll.c:930
+#19 0x00007ffff672a7e0 in std_event_loop_once (ev=0x5555557c5e40, location=0x7ffff74a6188 "../source3/smbd/process.c:4127")
+    at ../lib/tevent/tevent_standard.c:114
+---Type <return> to continue, or q <return> to quit---
+#20 0x00007ffff67240f1 in _tevent_loop_once (ev=0x5555557c5e40, location=0x7ffff74a6188 "../source3/smbd/process.c:4127") at ../lib/tevent/tevent.c:725
+#21 0x00007ffff6724408 in tevent_common_loop_wait (ev=0x5555557c5e40, location=0x7ffff74a6188 "../source3/smbd/process.c:4127") at ../lib/tevent/tevent.c:848
+#22 0x00007ffff672a882 in std_event_loop_wait (ev=0x5555557c5e40, location=0x7ffff74a6188 "../source3/smbd/process.c:4127")
+    at ../lib/tevent/tevent_standard.c:145
+#23 0x00007ffff67244ab in _tevent_loop_wait (ev=0x5555557c5e40, location=0x7ffff74a6188 "../source3/smbd/process.c:4127") at ../lib/tevent/tevent.c:867
+#24 0x00007ffff73458ee in smbd_process (ev_ctx=0x5555557c5e40, msg_ctx=0x5555557c6270, sock_fd=28, interactive=true) at ../source3/smbd/process.c:4127
+#25 0x00005555555600c7 in smbd_accept_connection (ev=0x5555557c5e40, fde=0x5555557e1820, flags=1, private_data=0x5555557e1bd0)
+    at ../source3/smbd/server.c:981
+#26 0x00007ffff672d4ac in epoll_event_loop (epoll_ev=0x5555557c60c0, tvalp=0x7fffffffe0a0) at ../lib/tevent/tevent_epoll.c:728
+#27 0x00007ffff672dae4 in epoll_event_loop_once (ev=0x5555557c5e40, location=0x555555566c8c "../source3/smbd/server.c:1397")
+    at ../lib/tevent/tevent_epoll.c:930
+#28 0x00007ffff672a7e0 in std_event_loop_once (ev=0x5555557c5e40, location=0x555555566c8c "../source3/smbd/server.c:1397")
+    at ../lib/tevent/tevent_standard.c:114
+#29 0x00007ffff67240f1 in _tevent_loop_once (ev=0x5555557c5e40, location=0x555555566c8c "../source3/smbd/server.c:1397") at ../lib/tevent/tevent.c:725
+#30 0x00007ffff6724408 in tevent_common_loop_wait (ev=0x5555557c5e40, location=0x555555566c8c "../source3/smbd/server.c:1397") at ../lib/tevent/tevent.c:848
+#31 0x00007ffff672a882 in std_event_loop_wait (ev=0x5555557c5e40, location=0x555555566c8c "../source3/smbd/server.c:1397")
+    at ../lib/tevent/tevent_standard.c:145
+#32 0x00007ffff67244ab in _tevent_loop_wait (ev=0x5555557c5e40, location=0x555555566c8c "../source3/smbd/server.c:1397") at ../lib/tevent/tevent.c:867
+#33 0x00005555555610bc in smbd_parent_loop (ev_ctx=0x5555557c5e40, parent=0x5555557cc2b0) at ../source3/smbd/server.c:1397
+#34 0x0000555555563262 in main (argc=2, argv=0x7fffffffe698) at ../source3/smbd/server.c:2164
+(gdb)
+
+---
+
