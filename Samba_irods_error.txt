@@ -468,3 +468,113 @@ Program received signal SIGSEGV, Segmentation fault.
 
 ---
 
+20170404:
+NOTICE: created irodsHome=/tempZone/home/davor
+NOTICE: created irodsCwd=/tempZone/home/davor
+0x00007fffdfc717d3 in irods::error irods::load_plugin<irods::network, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > >(irods::network*&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) ()
+   from /usr/lib/libirods_plugin_dependencies.so.4.2.2
+(gdb) s
+Single stepping until exit from function _ZN5irods11load_pluginINS_7networkEJNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEEEEENS_5errorERPT_RKS8_SE_SE_DpRKT0_,
+which has no line number information.
+DEBUG: resolved plugin home [/usr/lib/irods/plugins/network/]
+__dlopen (file=0x5555558141c0 "/usr/lib/irods/plugins/network/libtcp_client.so", mode=1)
+    at dlopen.c:75
+75      dlopen.c: No such file or directory.
+(gdb)
+
+(gdb) bt
+#0  __dlopen (file=0x5555558141c0 "/usr/lib/irods/plugins/network/libtcp_client.so", mode=1)
+    at dlopen.c:75
+#1  0x00007fffdfc71f41 in irods::error irods::load_plugin<irods::network, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > >(irods::network*&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) ()
+   from /usr/lib/libirods_plugin_dependencies.so.4.2.2
+#2  0x00007fffdfc709e4 in irods::network_manager::init_from_type(int const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, boost::shared_ptr<irods::network>&) ()
+   from /usr/lib/libirods_plugin_dependencies.so.4.2.2
+#3  0x00007fffdfc799ee in irods::tcp_object::resolve(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, boost::shared_ptr<irods::plugin_base>&) ()
+   from /usr/lib/libirods_plugin_dependencies.so.4.2.2
+#4  0x00007fffdff4fbf1 in sendRodsMsg(boost::shared_ptr<irods::network_object>, char const*, BytesBuf*, BytesBuf*, BytesBuf*, int, irodsProt_t) () from /usr/lib/libirods_client.so.4.2.2
+#5  0x00007fffdff4f283 in sendStartupPack () from /usr/lib/libirods_client.so.4.2.2
+#6  0x00007fffdff4e175 in connectToRhost () from /usr/lib/libirods_client.so.4.2.2
+#7  0x00007fffdff3a65d in _rcConnect () from /usr/lib/libirods_client.so.4.2.2
+#8  0x00007fffdff3a3fb in rcConnect () from /usr/lib/libirods_client.so.4.2.2
+#9  0x00007fffe01a7e4e in connect_to_irods (handle=0x555555813160,
+    user=0x5555557f2f00 "TEST\\davor") at ../source3/modules/vfs_stor.c:232
+#10 0x00007fffe01a7f6a in stor_connect (handle=0x555555813160, service=0x5555557ed940 "zone",
+    user=0x5555557f2f00 "TEST\\davor") at ../source3/modules/vfs_stor.c:346
+#11 0x00007ffff7327ab5 in smb_vfs_call_connect (handle=0x555555813160,
+    service=0x5555557ed940 "zone", user=0x5555557f2f00 "TEST\\davor") at ../source3/smbd/vfs.c:1549
+#12 0x00007ffff734775c in make_connection_snum (xconn=0x5555557c64b0, conn=0x5555557e91c0, snum=0,
+    vuser=0x5555557f0ce0, pdev=0x7ffff74b04ab "???") at ../source3/smbd/service.c:651
+#13 0x00007ffff7348811 in make_connection_smb2 (req=0x5555557e0fe0, tcon=0x5555557f0f00, snum=0,
+    vuser=0x5555557f0ce0, pdev=0x7ffff74b04ab "???", pstatus=0x7fffffffd8e0)
+    at ../source3/smbd/service.c:960
+#14 0x00007ffff73683d0 in smbd_smb2_tree_connect (req=0x5555557e0fe0,
+    in_path=0x5555557e1370 "\\\\isamba\\zone", out_share_type=0x5555557e15d8 "",
+    out_share_flags=0x5555557e15dc, out_capabilities=0x5555557e15e0,
+    out_maximal_access=0x5555557e15e4, out_tree_id=0x5555557e15e8, disconnect=0x5555557e15ec)
+---Type <return> to continue, or q <return> to quit---
+    at ../source3/smbd/smb2_tcon.c:309
+#15 0x00007ffff73687f2 in smbd_smb2_tree_connect_send (mem_ctx=0x5555557e0fe0, ev=0x5555557c5e30,
+    smb2req=0x5555557e0fe0, in_path=0x5555557e1370 "\\\\isamba\\zone")
+    at ../source3/smbd/smb2_tcon.c:415
+#16 0x00007ffff7367951 in smbd_smb2_request_process_tcon (req=0x5555557e0fe0)
+    at ../source3/smbd/smb2_tcon.c:93
+#17 0x00007ffff735d3e3 in smbd_smb2_request_dispatch (req=0x5555557e0fe0)
+    at ../source3/smbd/smb2_server.c:2586
+#18 0x00007ffff7361447 in smbd_smb2_io_handler (xconn=0x5555557c64b0, fde_flags=1)
+    at ../source3/smbd/smb2_server.c:3895
+#19 0x00007ffff736154d in smbd_smb2_connection_handler (ev=0x5555557c5e30, fde=0x5555557df870,
+    flags=1, private_data=0x5555557c64b0) at ../source3/smbd/smb2_server.c:3933
+#20 0x00007ffff672d4ac in epoll_event_loop (epoll_ev=0x5555557dcc20, tvalp=0x7fffffffdd00)
+    at ../lib/tevent/tevent_epoll.c:728
+#21 0x00007ffff672dae4 in epoll_event_loop_once (ev=0x5555557c5e30,
+    location=0x7ffff74a6188 "../source3/smbd/process.c:4127") at ../lib/tevent/tevent_epoll.c:930
+#22 0x00007ffff672a7e0 in std_event_loop_once (ev=0x5555557c5e30,
+    location=0x7ffff74a6188 "../source3/smbd/process.c:4127")
+    at ../lib/tevent/tevent_standard.c:114
+#23 0x00007ffff67240f1 in _tevent_loop_once (ev=0x5555557c5e30,
+    location=0x7ffff74a6188 "../source3/smbd/process.c:4127") at ../lib/tevent/tevent.c:725
+#24 0x00007ffff6724408 in tevent_common_loop_wait (ev=0x5555557c5e30,
+    location=0x7ffff74a6188 "../source3/smbd/process.c:4127") at ../lib/tevent/tevent.c:848
+#25 0x00007ffff672a882 in std_event_loop_wait (ev=0x5555557c5e30,
+    location=0x7ffff74a6188 "../source3/smbd/process.c:4127")
+    at ../lib/tevent/tevent_standard.c:145
+#26 0x00007ffff67244ab in _tevent_loop_wait (ev=0x5555557c5e30,
+    location=0x7ffff74a6188 "../source3/smbd/process.c:4127") at ../lib/tevent/tevent.c:867
+#27 0x00007ffff73458ee in smbd_process (ev_ctx=0x5555557c5e30, msg_ctx=0x5555557c6260, sock_fd=28,
+    interactive=true) at ../source3/smbd/process.c:4127
+#28 0x00005555555600c7 in smbd_accept_connection (ev=0x5555557c5e30, fde=0x5555557dc890, flags=1,
+    private_data=0x5555557dd830) at ../source3/smbd/server.c:981
+#29 0x00007ffff672d4ac in epoll_event_loop (epoll_ev=0x5555557c60b0, tvalp=0x7fffffffe0a0)
+    at ../lib/tevent/tevent_epoll.c:728
+#30 0x00007ffff672dae4 in epoll_event_loop_once (ev=0x5555557c5e30,
+    location=0x555555566c8c "../source3/smbd/server.c:1397") at ../lib/tevent/tevent_epoll.c:930
+#31 0x00007ffff672a7e0 in std_event_loop_once (ev=0x5555557c5e30,
+    location=0x555555566c8c "../source3/smbd/server.c:1397") at ../lib/tevent/tevent_standard.c:114
+#32 0x00007ffff67240f1 in _tevent_loop_once (ev=0x5555557c5e30,
+---Type <return> to continue, or q <return> to quit---
+    location=0x555555566c8c "../source3/smbd/server.c:1397") at ../lib/tevent/tevent.c:725
+#33 0x00007ffff6724408 in tevent_common_loop_wait (ev=0x5555557c5e30,
+    location=0x555555566c8c "../source3/smbd/server.c:1397") at ../lib/tevent/tevent.c:848
+#34 0x00007ffff672a882 in std_event_loop_wait (ev=0x5555557c5e30,
+    location=0x555555566c8c "../source3/smbd/server.c:1397") at ../lib/tevent/tevent_standard.c:145
+#35 0x00007ffff67244ab in _tevent_loop_wait (ev=0x5555557c5e30,
+    location=0x555555566c8c "../source3/smbd/server.c:1397") at ../lib/tevent/tevent.c:867
+#36 0x00005555555610bc in smbd_parent_loop (ev_ctx=0x5555557c5e30, parent=0x5555557ca380)
+    at ../source3/smbd/server.c:1397
+#37 0x0000555555563262 in main (argc=2, argv=0x7fffffffe698) at ../source3/smbd/server.c:2164
+(gdb) q
+A debugging session is active.
+
+        Inferior 1 [process 28059] will be killed.
+
+Quit anyway? (y or n) y
+
+theuser@isamba-c:~/samba-4.7.3$ ls -al /usr/lib/irods/plugins/network/
+total 968
+drwxr-xr-x 2 root root   4096 Feb 16 04:56 .
+drwxr-xr-x 4 root root   4096 Feb 16 04:56 ..
+-rw-r--r-- 1 root root 237128 Nov  7 22:36 libssl_client.so
+-rw-r--r-- 1 root root 237128 Nov  7 22:40 libssl_server.so
+-rw-r--r-- 1 root root 252200 Nov  7 22:36 libtcp_client.so
+-rw-r--r-- 1 root root 252200 Nov  7 22:40 libtcp_server.so
+theuser@isamba-c:~/samba-4.7.3$
