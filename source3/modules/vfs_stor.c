@@ -2,7 +2,7 @@
  * vfs_stor.c
  * Copyright (C) Davor Vusir, 2018
  *
- * 20180405
+ * 20180506
  * 
  * Created from Skeleton VFS module.
  *
@@ -31,7 +31,7 @@
 
 #include <stdio.h>
 
-#include "../source3/include/includes.h"
+#include "includes.h"
 #include "lib/util/tevent_ntstatus.h"
 #include "lib/param/param.h"
 #include "lib/param/loadparm.h"
@@ -45,6 +45,7 @@
 #include "irods/getRodsEnv.h"
 #include "irods/parseCommandLine.h"
 #include "irods/rcMisc.h"
+#include "irods/miscUtil.h"
 #include "irods/rodsClient.h"
 #include "irods/rcConnect.h"
 #include "irods/sockComm.h"
@@ -53,10 +54,38 @@
 #undef DBGC_CLASS
 #define DBGC_CLASS DBGC_VFS
 
-rcComm_t *stor_conn;
-rodsEnv env;
-rErrMsg_t err_msg;
-int reconn_flag;
+/* One appealing idea is to use DatabaseFS as a template for presenting a
+ * directory or file. see https://github.com/ZeWaren/DatabaseFS or maybe it is
+ * better to gather the handle and entry in a separate struct.
+ * And extend (or copy) the result to struct files_struct. That way I hope that
+ * the SQL querys and other iRODS specifics get a natural presentation to
+ * Windows/SMB client.
+ * See
+ * https://wiki.samba.org/index.php/Writing_a_Samba_VFS_Module#Extending_the_Samba_files_struct_structure
+ * and
+ * https://github.com/samba-team/samba/blob/v4-7-stable/source3/include/vfs.h#L298 */
+struct stor_file {
+    collHandle_t *coll_handle;   /* Handle to iRODS collection */
+    collEnt_t *coll_ent;         /* Equivalent to a directory or file? */
+ 
+};
+
+struct stor_data {
+    /* iRODS specific */
+    rcComm_t *stor_conn;	/* ICAT database connection handle */
+    rodsEnv env;		/* User's connection information */
+    rErrMsg_t err_msg;
+    int reconn_flag;
+/*    collHandle_t *coll_handle;    Handle to iRODS collection */
+/*    collEnt_t *coll_ent;          Equivalent to a directory or file? */
+    
+/* "Samba/SMB specific" */
+/*  char path_prefix[MAX_NAME_LEN];	local (to server) path prefix
+					(path in smb.conf) or user's
+					stor_data->rodsHome[] when 
+					first connected */	
+								
+};
 
 struct passwd *act_user;
 
@@ -64,19 +93,24 @@ static int stor_connect(vfs_handle_struct *handle, const char *service,
 			const char *user)
 {
     int status;
-    int conn_return = 0;
+    int conn_return;
     uid_t vfs_stor_uid;
     gid_t vfs_stor_gid;
-    uint64_t vfs_stor_vuid;
+//    uint64_t vfs_stor_vuid;
     TALLOC_CTX *mem_ctx = talloc_tos();
+    TALLOC_CTX *initial_path_ctx = talloc_tos();
     char *tmp_user_home;
+    struct smb_filename *initial_path;
+    struct stor_data *rods = NULL;
     
     DEBUG(1, (__location__ ": cnum[%u], connectpath[%s]\n",
 		   (unsigned)handle->conn->cnum,
                     handle->conn->connectpath));
     
-    stor_conn = NULL;
-    reconn_flag = NO_RECONN;
+//    rods->stor_conn = NULL;
+//    rods->reconn_flag = NO_RECONN;
+    status = 0; /* Assume connection is successful. */
+    conn_return = 0;
     
     vfs_stor_uid = handle->conn->session_info->unix_token->uid;
     vfs_stor_uid = get_current_uid(handle->conn);
@@ -88,37 +122,90 @@ static int stor_connect(vfs_handle_struct *handle, const char *service,
     setenv("HOME", tmp_user_home, 1);
     setenv("USER", act_user->pw_name, 1);
     setenv("LOGNAME", act_user->pw_name, 1);
-    
-    status = getRodsEnv(&env);
-    
-    stor_conn = talloc_zero(handle->conn, rcComm_t);
-    if (stor_conn == NULL) {
+
+/* https://github.com/samba-team/samba/blob/master/docs-xml/Samba-Developers-Guide/vfs.xml
+    SMB_VFS_OPAQUE_OPEN(conn, fname, flags, mode);
+ */
+    rods = talloc_zero(handle->conn, struct stor_data);
+    if (rods == NULL) {
         conn_return = -1;
         DEBUG(1, ("[VFS_STOR] - talloc_zero - vfs_stor: %s\n",
-				"stor_conn == NULL\n"));
+				"rods == NULL\n"));
         errno = ENOMEM;
         return conn_return;
 //        return -1;
     }
-    stor_conn = rcConnect(env.rodsHost, env.rodsPort,
-                          act_user->pw_name,
-                          env.rodsZone, reconn_flag, &err_msg);
     
-    SMB_VFS_HANDLE_SET_DATA(handle, stor_conn, NULL, rcComm_t, return -1);
+    rods->stor_conn = NULL;
+    
+    status = getRodsEnv(&rods->env);
+    if (status == 0){
+        rods->stor_conn = rcConnect(rods->env.rodsHost, rods->env.rodsPort,
+                          rods->env.rodsUserName,
+                          rods->env.rodsZone, rods->reconn_flag, &rods->err_msg);
+    	
+	DEBUG(1, ("[VFS_STOR] -  connection to zone established: %s\n",
+                                "rcConnect() succeded.\n"));
+/*
+        DEBUG(1, ("[VFS_STOR] -  env.rodsHost: %s\n",
+                                env.rodsHost));
+        DEBUG(1, ("[VFS_STOR] -  env.rodsAuthScheme: %s\n",
+                                env.rodsAuthScheme));
+        
+        DEBUG(1, ("[VFS_STOR] -  authInfo.authFlag: %i\n",
+                                stor_conn->clientUser.authInfo.authFlag));
+        DEBUG(1, ("[VFS_STOR] -  authInfo.authScheme: %s\n",
+                                stor_conn->clientUser.authInfo.authScheme));
+        DEBUG(1, ("[VFS_STOR] -  authInfo.authStr: %s\n",
+                                stor_conn->clientUser.authInfo.authStr));
+        DEBUG(1, ("[VFS_STOR] -  authInfo.host: %s\n",
+                                stor_conn->clientUser.authInfo.host));
+        DEBUG(1, ("[VFS_STOR] -  authInfo.ppid: %i\n",
+                                stor_conn->clientUser.authInfo.ppid));
+        rstrcpy(stor_conn->clientUser.authInfo.authScheme, env.rodsAuthScheme,
+                       MAX_NAME_LEN);
+        rstrcpy(stor_conn->clientUser.authInfo.host, env.rodsHost,
+                       MAX_NAME_LEN);
+*/        
+        /* 
+         * This is set by clientLogin() when an iCommand is run.
+         * Might be useful.
+         */
+        rods->stor_conn->loggedIn = 1;
+    
+    } else {
+        status = -1;
+        DEBUG(1, ("[VFS_STOR] - could not rcConnect(): %s\n",
+				"getRodsEnv() failed.\n"));
+        errno = ENOMEM;
+        return status;
+    }
 
-    /* All OK. */
-    return conn_return;
+    if(rods != NULL){
+      SMB_VFS_HANDLE_SET_DATA(handle, rods, NULL, struct stor_data, return -1);
+//        handle->conn->connectpath = talloc_strdup_append(handle->conn->connectpath,
+//                                            env.rodsCwd);
+//        initial_path = synthetic_smb_fname(initial_path_ctx, env.rodsCwd,
+//                                            NULL, NULL, 0);
+//        handle->conn->connectpath = talloc_strdup_append(handle->conn->connectpath,
+//                                            initial_path->base_name);
+        DEBUG(1, (__location__ ": cnum[%u], connectpath[%s]\n",
+		   (unsigned)handle->conn->cnum,
+                    handle->conn->connectpath));
+//        handle->data = rods;
 
-/*	This test environment uses the home directory attribute in AD
-	(homeDirectory) to get the location of the home directory.
-	As Windows cannot interpret POSIX(?) style I have
-	used (/data/home/davor). Examine where the smb.conf para-
-	meter 'template homedir' is stored. The Samba server, and
-	iRODS don't care if it's overridden. The important thing is
-	that the users home directory is local to the Samba server for
-	this module's iRODS getRodsEnv() to read. Therefore the VFS parameters
-	and commented code at the end of this function.
-*/
+        /* All OK. */
+        return status;
+
+    } else {
+        status = -1;
+        DEBUG(1, ("[VFS_STOR] - could not rcConnect(): %i, %s\n",
+				rods->err_msg.status, rods->err_msg.msg));
+        errno = ENOMEM;
+        return status;
+    }
+//    return -1;
+    
 /*	At some time it would be great to create a function that mimics
 	iinit to create the users environment file if it's not present.
 */
@@ -126,6 +213,16 @@ static int stor_connect(vfs_handle_struct *handle, const char *service,
 	errors has to be created. This error should be returned to the
 	Windows client computer.
 */
+}
+
+static void stor_disconnect(vfs_handle_struct *handle)
+{
+    struct stor_data *rods_disconn = NULL;
+    
+    /* User has logged out or disconnected from server. */
+    SMB_VFS_HANDLE_GET_DATA(handle, rods_disconn, struct stor_data, return -1);
+    rcDisconnect(rods_disconn->stor_conn);
+//    SMB_VFS_NEXT_DISCONNECT(handle);
 }
 
 /*
@@ -302,14 +399,6 @@ setenv("LOGNAME", act_user->pw_name, 1);
     return 0;
  } //END - connect_to_irods
 */
-
-static void stor_disconnect(vfs_handle_struct *handle)
-{
-        /* User has logged out or disconnected from server. */
-//	SMB_VFS_HANDLE_GET_DATA(handle, conn, rcComm_t, return -1);
-//	rcDisconnect(conn);
-//	SMB_VFS_NEXT_DISCONNECT(handle);
-}
 
 static uint64_t stor_disk_free(vfs_handle_struct *handle,
 				const struct smb_filename *smb_fname,
@@ -682,15 +771,47 @@ static int stor_lchown(vfs_handle_struct *handle,
 static int stor_chdir(vfs_handle_struct *handle,
 			const struct smb_filename *smb_fname)
 {
+/*
+         int status;
+        
+        rodsArguments_t myRodsArgs;
+        rodsPath_t rodsPath;
+        
+        memset( ( char* )&rodsPath, 0, sizeof( rodsPath ) );
+        rstrcpy( rodsPath.inPath, env.rodsCwd, MAX_NAME_LEN );
+        parseRodsPath( &rodsPath, &env );
+        
+        init_client_api_table();
+        status = getRodsObjType( handle->data->stor_conn, &rodsPath );
+        
+//        handle->conn->connectpath = rodsPath.inPath;
+        handle->conn->connectpath = talloc_strdup_append(handle->conn->connectpath,
+                                            handle->data->env.rodsCwd);
+        DBG_DEBUG("[VFS_STOR] chdir(%p) = %s\n", handle, handle->conn->connectpath);
+//        DEBUG(1, (__location__ ": cnum[%u], connectpath[%s]\n",
+//		   (unsigned)handle->conn->cnum,
+//                    handle->conn->connectpath));
+    
+        return status;
+*/
 	errno = ENOSYS;
 	return -1;
+ 
+
 }
 
 static struct smb_filename *stor_getwd(vfs_handle_struct *handle,
 				TALLOC_CTX *ctx)
 {
-	errno = ENOSYS;
+/*
+     const char *cwd = handle->data->env.rodsCwd;
+    
+    DBG_DEBUG("[VFS_STOR] getwd(%p) = %s\n", handle, cwd);
+    return synthetic_smb_fname(ctx, cwd, NULL, NULL, 0);
+*/
+        errno = ENOSYS;
 	return NULL;
+
 }
 
 static int stor_ntimes(vfs_handle_struct *handle,
@@ -849,6 +970,7 @@ static NTSTATUS stor_offload_read_recv(struct tevent_req *req,
 struct stor_cc_state {
 	uint64_t unused;
 };
+
 static struct tevent_req *stor_offload_write_send(struct vfs_handle_struct *handle,
 					       TALLOC_CTX *mem_ctx,
 					       struct tevent_context *ev,
@@ -925,8 +1047,11 @@ static int stor_get_real_filename(struct vfs_handle_struct *handle,
 static const char *stor_connectpath(struct vfs_handle_struct *handle,
 				const struct smb_filename *smb_fname)
 {
-	errno = ENOSYS;
+	return handle->conn->connectpath;
+/*        
+        errno = ENOSYS;
 	return NULL;
+*/
 }
 
 static NTSTATUS stor_brl_lock_windows(struct vfs_handle_struct *handle,
