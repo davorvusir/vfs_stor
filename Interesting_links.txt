@@ -1,0 +1,54 @@
+Lista över intressanta länkar:
+https://wiki.samba.org/index.php/Writing_a_Samba_VFS_Module#The_Meaning_of_Path_Names
+
+struct dirent: http://man7.org/linux/man-pages/man3/readdir.3.html
+
+DatabaseFS: https://github.com/ZeWaren/DatabaseFS
+
+Samba
+struct fd_handle, struct files_struct, struct connection_struct,
+struct smb_filename:
+https://github.com/samba-team/samba/blob/v4-7-stable/source3/include/vfs.h
+
+struct smb_Dir:
+https://github.com/samba-team/samba/blob/v4-7-stable/source3/smbd/dir.c
+
+SMB_STRUCT_STAT:
+https://github.com/avati/samba/blob/master/source3/include/includes.h
+
+vfs_macros:
+https://github.com/samba-team/samba/blob/v4-7-stable/source3/include/vfs_macros.h
+
+TALLOC:
+https://talloc.samba.org/talloc/doc/html/index.html
+
+iRODS:
+typedef struct rcComm_t:
+https://github.com/irods/irods/blob/4-2-stable/lib/core/include/rcConnect.h
+
+typedef struct userInfo_t, typedef struct authInfo_t:
+https://github.com/irods/irods/blob/4-2-stable/lib/core/include/rodsUser.h
+
+typedef struct rodsEnv:
+https://github.com/irods/irods/blob/4-2-stable/lib/core/include/getRodsEnv.h
+
+typedef struct rodsStat rodsStat_t, typedef struct rodsDirent rodsDirent_t:
+https://github.com/irods/irods/blob/4-2-stable/lib/core/include/rodsType.h
+
+typedef struct QueryHandle queryHandle_t, div SQL:
+https://github.com/irods/irods/blob/4-2-stable/lib/core/include/miscUtil.h
+
+typedef struct RodsPath rodsPath_t, rodsPathInp_t:
+https://github.com/irods/irods/blob/4-2-stable/lib/core/include/rodsPath.h
+
+struct fileDesc_t:
+https://github.com/irods/irods/blob/4-2-stable/server/core/include/fileOpr.hpp
+
+struct collEnt_t, struct 
+https://github.com/irods/irods/blob/4-2-stable/lib/core/include/miscUtil.h
+
+
+
+
+irods_c_api:
+https://github.com/irods/irods/blob/4-2-stable/lib/core/src/irods_c_api.cpp
