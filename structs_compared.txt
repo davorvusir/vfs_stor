@@ -1,0 +1,86 @@
+As I find the structs, I will populate this list. Yeah, this is do-able!
+
+https://github.com/samba-team/samba/blob/v4-7-stable/source3/include/vfs.h#L275
+https://github.com/irods/irods/blob/4-2-stable/server/core/include/fileOpr.hpp#L24
+Samba:																			iRODS:
+struct fd_handle {																typedef struct {
+	size_t ref_count;															    int inuseFlag;      /* whether the fileDesc is in use, 0=no */
+	int fd;																			rodsServerHost_t *rodsServerHost;
+	uint64_t position_information;												    char *fileName;
+	off_t pos;																		char *rescHier;             // The hierarchy of resources in which this file resides
+	uint32_t private_options; /* NT Create options, but we only look at			    char *objPath;              // The logical path
+								* NTCREATEX_OPTIONS_PRIVATE_DENY_DOS and		    int mode;
+								* NTCREATEX_OPTIONS_PRIVATE_DENY_FCB and		    int chkPerm;        /* check for permission in the file vault */
+								* NTCREATEX_OPTIONS_PRIVATE_DELETE_ON_CLOSE		    int fd;             /* the file descriptor from driver */
+								* for print files *only*, where					    int writtenFlag;    /* indicated whether the file has been written to */
+								* DELETE_ON_CLOSE is not stored in the share	    void *driverDep;    /* driver dependent stuff */
+								* mode database.								} fileDesc_t;
+								*/
+	unsigned long gen_id;
+};
+
+https://github.com/samba-team/samba/blob/v4-7-stable/source3/include/includes.h#305
+https://github.com/irods/irods/blob/4-2-stable/lib/core/include/rodsType.h#52
+Samba:													iRODS:
+struct stat_ex {										typedef struct rodsStat {
+	dev_t		st_ex_dev;								    rodsLong_t          st_size;        /* file size */
+	ino_t		st_ex_ino;								    unsigned int        st_dev;
+	mode_t		st_ex_mode;								    unsigned int        st_ino;
+	nlink_t		st_ex_nlink;							    unsigned int        st_mode;
+	uid_t		st_ex_uid;								    unsigned int        st_nlink;
+	gid_t		st_ex_gid;								    unsigned int        st_uid;
+	dev_t		st_ex_rdev;								    unsigned int        st_gid;
+	off_t		st_ex_size;								    unsigned int        st_rdev;
+	struct timespec st_ex_atime;						    unsigned int        st_atim;        /* time of last access */
+	struct timespec st_ex_mtime;						    unsigned int        st_mtim;        /* time of last mod */
+	struct timespec st_ex_ctime;						    unsigned int        st_ctim;        /* time of last status change */
+	struct timespec st_ex_btime; /* birthtime */		    unsigned int        st_blksize;     /* Optimal blocksize of FS */
+	/* Is birthtime real, or was it calculated ? */		    unsigned int        st_blocks;      /* number of blocks */
+	bool		st_ex_calculated_birthtime;				} rodsStat_t;
+	blksize_t	st_ex_blksize;
+	blkcnt_t	st_ex_blocks;
+
+	uint32_t	st_ex_flags;
+	uint32_t	st_ex_mask;
+};
+
+typedef struct stat_ex SMB_STRUCT_STAT;
+
+
+https://github.com/samba-team/samba/blob/v4-7-stable/source3/smbd/dir.c#51
+https://github.com/irods/irods/blob/4-2-stable/lib/core/include/rodsType.h#70
+Samba:																iRODS:
+struct smb_Dir {													typedef struct rodsDirent {
+	connection_struct *conn;										    unsigned int    d_offset;       /* offset after this entry */
+	DIR *dir;														    unsigned int    d_ino;          /* inode number */
+	long offset;													    unsigned int    d_reclen;       /* length of this record */
+	struct smb_filename *dir_smb_fname;								    unsigned int    d_namlen;       /* length of d_name */
+	size_t name_cache_size;											    char            d_name[DIR_LEN];
+	struct name_cache_entry *name_cache;							} rodsDirent_t;
+	unsigned int name_cache_index;
+	unsigned int file_number;
+	files_struct *fsp; /* Back pointer to containing fsp, only
+						set from OpenDir_fsp(). */
+};
+
+
+
+
+
+vfs_gpfs_connect
+https://github.com/samba-team/samba/blob/master/source3/modules/vfs_gpfs.c#L2076
+
+SMB_VFS_NEXT_CONNECT
+https://github.com/samba-team/samba/blob/master/source3/modules/vfs_gpfs.c#L2091
+https://github.com/samba-team/samba/blob/master/source3/include/vfs_macros.h#L34
+
+smb_vfs_call_connect
+https://github.com/samba-team/samba/blob/master/source3/include/vfs_macros.h#L34
+https://github.com/samba-team/samba/blob/master/source3/smbd/vfs.c#L1473
+
+VFS_FIND
+https://github.com/samba-team/samba/blob/master/source3/smbd/vfs.c#L1476
+https://github.com/samba-team/samba/blob/master/source3/include/vfs.h#L586
+
+handle->fns
+https://github.com/samba-team/samba/blob/master/source3/smbd/vfs.c#L203
