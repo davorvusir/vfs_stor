@@ -47,7 +47,8 @@ https://github.com/irods/irods/blob/4-2-stable/server/core/include/fileOpr.hpp
 struct collEnt_t, struct 
 https://github.com/irods/irods/blob/4-2-stable/lib/core/include/miscUtil.h
 
-
+struct sqlResult_t:
+https://github.com/irods/irods/blob/4-2-stable/lib/core/include/rodsGenQuery.h
 
 
 irods_c_api:
