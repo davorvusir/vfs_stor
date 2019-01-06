@@ -111,7 +111,7 @@ struct stor_file {
 #define STREAM_FILE_NAME        "stream"   /* a fake file name for stream */
 
 /* How should iRODS file descriptors be used together with Samba's?
- * https://github.com/irods/irods/blob/4-2-stable/server/core/include/fileOpr.hpp
+ * https://github.com/irods/irods/blob/4-2-stable/lib/core/include/rodsType.h#L52
  * https://github.com/samba-team/samba/blob/v4-7-stable/source3/include/vfs.h#L275
  * Is it the Samba file descriptors the URL to points to?
  */
