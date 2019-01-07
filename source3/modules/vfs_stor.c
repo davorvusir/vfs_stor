@@ -133,6 +133,8 @@ typedef struct {
 /* End of rip-off */
 
 /* Don't forget to tie iRODS' stat struct
+ * https://github.com/irods/irods/blob/4-2-stable/lib/core/include/rodsType.h#L52
+ * https://github.com/irods/irods/blob/4-2-stable/lib/api/include/objStat.h
  * https://github.com/irods/irods/blob/4-2-stable/lib/api/include/fileStat.h#L7
  * with Samba's
  https://github.com/samba-team/samba/blob/v4-7-stable/source3/include/includes.h#L219
