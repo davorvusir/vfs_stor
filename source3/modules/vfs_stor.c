@@ -136,8 +136,11 @@ typedef struct {
  * https://github.com/irods/irods/blob/4-2-stable/lib/core/include/rodsType.h#L52
  * https://github.com/irods/irods/blob/4-2-stable/lib/api/include/objStat.h
  * https://github.com/irods/irods/blob/4-2-stable/lib/api/include/fileStat.h#L7
- * with Samba's
- https://github.com/samba-team/samba/blob/v4-7-stable/source3/include/includes.h#L219
+ * with Samba's 
+ * https://github.com/samba-team/samba/blob/v4-7-stable/source3/include/includes.h#L219
+ * and for the function stor_statvfs() below
+ * https://github.com/samba-team/samba/blob/v4-7-stable/source3/include/vfs.h#L1039.
+ * Which to use?..
  */
 struct stor_conn {
     /* iRODS specific */
